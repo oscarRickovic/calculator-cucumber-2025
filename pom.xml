@@ -26,12 +26,12 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.version>3.13.0</maven.compiler.version>
-        #As of JDK 23, annotation processing is only run with some explicit configuration
-        #of annotation processing or with an explicit request to run annotation processing
-        #on the javac command line. This is a change in behavior from the existing default
-        #of looking to run annotation processing by searching the class path for processors
-        #without any explicit annotation processing related options needing to be present.
-        #In order to be enable this in Mavan, we need to turn on full compilation processing:
+        <!-- As of JDK 23, annotation processing is only run with some explicit configuration
+             of annotation processing or with an explicit request to run annotation processing
+             on the javac command line. This is a change in behavior from the existing default
+             of looking to run annotation processing by searching the class path for processors
+             without any explicit annotation processing related options needing to be present.
+             In order to be enable this in Mavan, we need to turn on full compilation processing: -->
         <maven.compiler.proc>full</maven.compiler.proc>
         <maven.surefire.version>3.5.2</maven.surefire.version>
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
