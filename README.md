@@ -1,16 +1,9 @@
-[![](https://img.shields.io/github/v/release/tommens/calculator-cucumber?label=Latest%20Release)](https://github.com/tommens/calculator-cucumber/releases/latest)
-[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/tommens/calculator-cucumber/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/tommens/calculator-cucumber)
+[![](https://img.shields.io/github/v/release/University-of-Mons/calculator-cucumber-2025?label=Latest%20Release)](https://github.com/University-of-Mons/calculator-cucumber/releases/latest)
 
-Code quality: ![Maven Build](https://github.com/tommens/calculator-cucumber/actions/workflows/maven.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6856a0f94d25446ca346cbc15a701d43)](https://www.codacy.com/gh/tommens/calculator-cucumber/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tommens/calculator-cucumber&amp;utm_campaign=Badge_Grade)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tommens_calculator-cucumber&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=tommens_calculator-cucumber)
+Code quality: ![Maven Build](https://github.com/University-of-Mons/calculator-cucumber-2025/actions/workflows/maven.yml/badge.svg)
 
 Test coverage: ![Coverage](.github/badges/jacoco.svg)
 ![Branches](.github/badges/branches.svg)
-
-Security analysis:
-![CodeQL](https://github.com/tommens/calculator-cucumber/actions/workflows/codeql.yml/badge.svg)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/tommens/calculator-cucumber/badge)](https://securityscorecards.dev/viewer/?uri=github.com/tommens/calculator-cucumber)
 
 
 # Calculating arithmetic expressions
