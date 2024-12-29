@@ -44,7 +44,7 @@ The BDD scenarios are specified as .feature files in the src\test\resources dire
 *  [JUnit5](https://junit.org/junit5/) - a unit testing framework for Java
 *  [Cucumber](https://cucumber.io/docs/cucumber/) - a tool for Behaviour-Driven Development
 *  [JaCoCo](https://www.jacoco.org) - a code coverage library for Java
-*  [JavaDoc](https://docs.oracle.com/en/java/javase/17/javadoc/javadoc.html) - a code documentation tool for Java
+*  [JavaDoc](https://docs.oracle.com/en/java/javase/21/javadoc/javadoc.html) - a code documentation tool for Java
 
 ## Versions
 
