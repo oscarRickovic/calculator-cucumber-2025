@@ -46,15 +46,14 @@ The BDD scenarios are specified as .feature files in the src\test\resources dire
 *  [JaCoCo](https://www.jacoco.org) - a code coverage library for Java
 *  [JavaDoc](https://docs.oracle.com/en/java/javase/17/javadoc/javadoc.html) - a code documentation tool for Java
 
-## Versioning
+## Versions
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/tommens/calculator-cucumber/tags). 
+We use [SemVer](http://semver.org/) for semantic versioning. For the versions available, see the [tags on this repository](https://github.com/University-of-Mons/calculator-cucumber-2025/tags). 
 
 ## Contributors
 
 * Tom Mens
 * Gauvain Devillez @GauvainD
-* Damien Legay @DamienLegay
 
 ## Licence
 
