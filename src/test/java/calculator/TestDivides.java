@@ -3,9 +3,10 @@ package calculator;
 //Import Junit5 libraries for unit testing:
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
-
+import calculator.Divides.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 class TestDivides {
@@ -76,4 +77,12 @@ class TestDivides {
 		assertThrows(IllegalConstruction.class, () -> op = new Divides(params));
 	}
 
+	@Test
+	void testDivisionByZero() throws IllegalConstruction {
+		Divides divides = new Divides(Collections.emptyList());
+
+		Exception exception = assertThrows(ArithmeticException.class, () -> divides.op(8, 0));
+		assertEquals("Division by zero is not allowed.", exception.getMessage());
+
+	}
 }
