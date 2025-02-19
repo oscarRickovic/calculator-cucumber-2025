@@ -4,4 +4,6 @@
 *.ipr
 *.DS_Store
 .idea/*
+*.class
+/target
 
