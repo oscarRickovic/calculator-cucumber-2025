@@ -1,5 +1,6 @@
 package calculator;
 
+import java.util.Arrays;
 import java.util.List;
 
 /** This class represents the arithmetic operation "-".
@@ -36,6 +37,12 @@ public final class Minus extends Operation
    */
   public Minus(List<Expression> elist, Notation n) throws IllegalConstruction {
   	super(elist,n);
+  	symbol = "-";
+  	neutral = 0;
+  }
+
+  public Minus(Notation n, Expression... elist) throws IllegalConstruction {
+  	super(Arrays.asList(elist),n);
   	symbol = "-";
   	neutral = 0;
   }

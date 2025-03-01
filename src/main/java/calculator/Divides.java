@@ -2,6 +2,7 @@ package calculator;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 /** This class represents the arithmetic division operation "/".
@@ -23,7 +24,7 @@ public final class Divides extends Operation
    * @see #Divides(List<Expression>,Notation)
    */
   public /*constructor*/ Divides(List<Expression> elist) throws IllegalConstruction {
-	this(elist, null);
+	  this(elist, null);
   }
 
     /**
@@ -37,10 +38,18 @@ public final class Divides extends Operation
      * @see Operation#Operation(List<Expression>,Notation)
      */
   public Divides(List<Expression> elist, Notation n) throws IllegalConstruction {
-	super(elist,n);
-	symbol = "/";
-	neutral = 1;
+    super(elist,n);
+    symbol = "/";
+    neutral = 1;
   }
+
+  public Divides(Notation n, Expression... elist) throws IllegalConstruction {
+    super(Arrays.asList(elist),n);
+    symbol = "/";
+    neutral = 1;
+  }
+
+
 
     /**
      * The actual computation of the (binary) arithmetic division of two integers

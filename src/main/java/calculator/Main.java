@@ -1,6 +1,7 @@
 package calculator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,6 +53,35 @@ public class Main {
 		List<Expression> params4 = new ArrayList<>();
 		Collections.addAll(params4, new Plus(params), new Minus(params2), new MyNumber(5));
 		e = new Divides(params4,Notation.POSTFIX);
+		c.print(e);
+		c.eval(e);
+		
+		//  ( (3 + 2) . (5 + (4 / 2)) / 2 )
+		
+		e = new Divides(null, 
+			new Times(null,
+				new Plus(null, new MyNumber(3), new MyNumber(2)),
+				new Plus(null,
+					new MyNumber(5),
+					new Divides(null, new MyNumber(4), new MyNumber(2))))
+			, new MyNumber(2)
+			
+		);
+
+		c.print(e);
+		c.eval(e);
+
+		// (4 . 3 . 2 . 5) / 5 + 1  = 25
+
+		e = new Plus(null, 
+			new Divides(null,
+				new Times(null, 
+				new MyNumber(4), new MyNumber(3), new MyNumber(2), new MyNumber(5)) 
+				, new MyNumber(5)
+			)
+			, new MyNumber(1)
+		);
+
 		c.print(e);
 		c.eval(e);
 	}
