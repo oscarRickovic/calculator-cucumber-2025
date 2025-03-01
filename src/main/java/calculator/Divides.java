@@ -44,7 +44,7 @@ public final class Divides extends Operation
   }
 
   public Divides(Notation n, Expression... elist) throws IllegalConstruction {
-    super(Arrays.asList(elist),n);
+    super(n, elist);
     symbol = "/";
     neutral = 1;
   }

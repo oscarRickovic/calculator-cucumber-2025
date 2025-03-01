@@ -42,7 +42,7 @@ public final class Minus extends Operation
   }
 
   public Minus(Notation n, Expression... elist) throws IllegalConstruction {
-  	super(Arrays.asList(elist),n);
+  	super(n, elist);
   	symbol = "-";
   	neutral = 0;
   }

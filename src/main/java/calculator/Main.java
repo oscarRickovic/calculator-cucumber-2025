@@ -84,6 +84,17 @@ public class Main {
 
 		c.print(e);
 		c.eval(e);
+
+		// (3 + 2 ) x 5
+
+		e = new Times(Notation.INFIX,
+			new Plus (Notation.POSTFIX, 
+			new MyNumber(3), new MyNumber(2)) 
+			, new MyNumber(5)
+		);
+
+		c.print(e);
+	
 	}
 
 	catch(IllegalConstruction exception) {
