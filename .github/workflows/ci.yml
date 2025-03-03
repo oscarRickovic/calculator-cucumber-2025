@@ -1,4 +1,4 @@
-name: Java CI
+name: CI Pipeline
 
 on:
   push:
@@ -11,32 +11,22 @@ on:
       - dev
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven' # Use 'gradle' if using Gradle
+          distribution: 'temurin'  # Use Temurin JDK
+          java-version: '21'
+          cache: 'maven'
 
-      - name: Build and run tests
-        run: mvn clean test # Change to 'gradle test' if using Gradle
+      - name: Verify Java Version
+        run: java -version
 
-  auto-merge:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Enable Auto-Merge
-        uses: pascalgn/automerge-action@v0.15.6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          mergeMethod: "squash"
+      - name: Build and Run Tests
+        run: mvn clean verify
