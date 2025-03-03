@@ -1,5 +1,6 @@
 package calculator;
 
+import java.util.Arrays;
 import java.util.List;
 
 /** This class represents the arithmetic sum operation "+".
@@ -36,6 +37,12 @@ public final class Plus extends Operation
    */
   public Plus(List<Expression> elist, Notation n) throws IllegalConstruction {
   	super(elist,n);
+  	symbol = "+";
+  	neutral = 0;
+  }
+
+  public Plus(Notation n, Expression... elist) throws IllegalConstruction {
+  	super(Arrays.asList(elist),n);
   	symbol = "+";
   	neutral = 0;
   }

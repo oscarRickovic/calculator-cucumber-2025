@@ -3,6 +3,7 @@ package calculator;
 import visitor.Visitor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -62,6 +63,17 @@ public abstract class Operation implements Expression
 			throw new IllegalConstruction(); }
 		else {
 			args = new ArrayList<>(elist);
+		}
+		if (n!=null) notation = n;
+	}
+
+	protected Operation(Notation n, Expression... elements)
+			throws IllegalConstruction
+	{
+		if (elements.length == 0) {
+			throw new IllegalConstruction(); }
+		else {
+			args = Arrays.asList(elements);
 		}
 		if (n!=null) notation = n;
 	}

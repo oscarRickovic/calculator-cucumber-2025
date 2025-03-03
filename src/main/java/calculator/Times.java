@@ -1,5 +1,6 @@
 package calculator;
 
+import java.util.Arrays;
 import java.util.List;
 
 /** This class represents the arithmetic multiplication operation "*".
@@ -35,6 +36,12 @@ public final class Times extends Operation
    */
   public Times(List<Expression> elist, Notation n) throws IllegalConstruction {
   	super(elist,n);
+  	symbol = "*";
+  	neutral = 1;
+  }
+
+  public Times(Notation n, Expression... elist) throws IllegalConstruction {
+  	super(Arrays.asList(elist),n);
   	symbol = "*";
   	neutral = 1;
   }
