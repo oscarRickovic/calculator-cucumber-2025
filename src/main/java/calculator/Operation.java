@@ -77,7 +77,7 @@ public abstract class Operation implements Expression
 			throw new IllegalConstruction(); }
 		else {
 			args = new ArrayList<>(elist);
-			handleNotationNestedConflict(args);
+			handleNotationNestedConflict();
 		}
 	}
 
@@ -223,18 +223,17 @@ public abstract class Operation implements Expression
 		result = prime * result + args.hashCode();
 		return result;
 	}
-
+	
 	// Avoid nested different types of notation in a parent notation.
 	// In nested expression we respect the parent notation.
 
-	public void handleNotationNestedConflict(List<Expression> elist) {
-		for (Expression e : elist) {
+	public void handleNotationNestedConflict() {
+		for (Expression e : this.args) {
 			if (e instanceof Operation op && op.notation != this.notation) {
-				op.notation = this.notation;
+				System.out.println("the owner notation : " + this.notation + " the child notation " + op.notation);
+				op.notation = (this.notation == null ? Notation.INFIX : this.notation);
+				op.handleNotationNestedConflict();
 			}
 		}
 	}
-	
-	
-
 }
