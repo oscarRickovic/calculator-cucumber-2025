@@ -111,6 +111,70 @@ class TestNotation {
 		final String RESULT4 = "* (+ (3, 2), 5)";
 		assertEquals(e.toString(), RESULT4);
 
+		e = new Plus(Notation.POSTFIX,
+			new MyNumber(1), 
+			new Divides(Notation.INFIX, 
+				new MyNumber(8),
+				new Times(Notation.PREFIX,
+					new MyNumber(2),
+					new Divides(Notation.INFIX,
+						new Times(Notation.POSTFIX, 
+							new MyNumber(2), new MyNumber(5), new MyNumber(20)
+						),
+						new Times(Notation.PREFIX,
+							new MyNumber(4), new MyNumber(2), new MyNumber(5)
+						)
+					)
+				)
+			)
+		);
+
+		final String RESULT5 = "(1, (8, (2, ((2, 5, 20) *, (4, 2, 5) *) /) *) /) +";
+		assertEquals(e.toString(), RESULT5);
+
+		e = new Plus(Notation.INFIX,
+			new MyNumber(1), 
+			new Divides(Notation.INFIX, 
+				new MyNumber(8),
+				new Times(Notation.PREFIX,
+					new MyNumber(2),
+					new Divides(Notation.PREFIX,
+						new Times(Notation.PREFIX, 
+							new MyNumber(2), new MyNumber(5), new MyNumber(20)
+						),
+						new Times(Notation.POSTFIX,
+							new MyNumber(4), new MyNumber(2), new MyNumber(5)
+						)
+					)
+				)
+			)
+		);
+
+		final String RESULT6 = "( 1 + ( 8 / ( 2 * ( ( 2 * 5 * 20 ) / ( 4 * 2 * 5 ) ) ) ) )";
+		assertEquals(e.toString(), RESULT6);
+
+
+		e = new Plus(Notation.PREFIX,
+			new MyNumber(1), 
+			new Divides(Notation.POSTFIX, 
+				new MyNumber(8),
+				new Times(Notation.PREFIX,
+					new MyNumber(2),
+					new Divides(Notation.PREFIX,
+						new Times(Notation.INFIX, 
+							new MyNumber(2), new MyNumber(5), new MyNumber(20)
+						),
+						new Times(Notation.POSTFIX,
+							new MyNumber(4), new MyNumber(2), new MyNumber(5)
+						)
+					)
+				)
+			)
+		);
+
+		final String RESULT7 = "+ (1, / (8, * (2, / (* (2, 5, 20), * (4, 2, 5)))))";
+		assertEquals(e.toString(), RESULT7);
+
 	}
 
 }
