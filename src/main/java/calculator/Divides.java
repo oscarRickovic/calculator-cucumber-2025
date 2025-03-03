@@ -2,6 +2,7 @@ package calculator;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,6 +16,8 @@ import java.util.List;
  */
 public final class Divides extends Operation
 {
+
+  protected static final List<String> SYMBOLES = new ArrayList<>(List.of("/"));
 
   /**
    * Class constructor specifying a number of Expressions to divide.
