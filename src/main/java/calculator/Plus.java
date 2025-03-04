@@ -42,7 +42,7 @@ public final class Plus extends Operation
   }
 
   public Plus(Notation n, Expression... elist) throws IllegalConstruction {
-  	super(Arrays.asList(elist),n);
+  	super(n, elist);
   	symbol = "+";
   	neutral = 0;
   }

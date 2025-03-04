@@ -41,7 +41,7 @@ public final class Times extends Operation
   }
 
   public Times(Notation n, Expression... elist) throws IllegalConstruction {
-  	super(Arrays.asList(elist),n);
+  	super(n, elist);
   	symbol = "*";
   	neutral = 1;
   }
