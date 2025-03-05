@@ -1,5 +1,6 @@
 package calculator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import java.util.List;
  */
 public final class Times extends Operation
  {
+
+  protected static final List<String> SYMBOLES = new ArrayList<>(List.of("x", "*"));
   /**
    * Class constructor specifying a number of Expressions to multiply.
    *
@@ -41,7 +44,7 @@ public final class Times extends Operation
   }
 
   public Times(Notation n, Expression... elist) throws IllegalConstruction {
-  	super(Arrays.asList(elist),n);
+  	super(n, elist);
   	symbol = "*";
   	neutral = 1;
   }

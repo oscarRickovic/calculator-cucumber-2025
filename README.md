@@ -1,65 +1,166 @@
-[![](https://img.shields.io/github/v/release/University-of-Mons/calculator-cucumber-2025?label=Latest%20Release)](https://github.com/University-of-Mons/calculator-cucumber/releases/latest)
+# Contributing to Calculator Cucumber Project
 
-Code quality: ![Maven Build](https://github.com/University-of-Mons/calculator-cucumber-2025/actions/workflows/maven.yml/badge.svg)
+## 🎉 Welcome Contributors!
 
-Test coverage: ![Coverage](.github/badges/jacoco.svg)
-![Branches](.github/badges/branches.svg)
+Thank you for your interest in contributing to the **Calculator Cucumber** project! We value and appreciate all contributions, whether it's fixing bugs, adding features, improving documentation, or enhancing test coverage.
 
+## 📋 Project Overview
 
-# Calculating arithmetic expressions
+This project is a calculator application using:
+- Java 21
+- Maven
+- JUnit 5
+- Cucumber for Behavior-Driven Development (BDD)
+- JavaFX for the user interface
 
-## About
+## 🛠 Prerequisites
 
-This repository contains Java code for computing arithmetic expressions. It is deliberately incomplete as it serves to be the basis of all kinds of extensions, such as a more sophisticated Calculator application. The code was written to be used for educational purposes at the University of Mons, Belgium in the context of the software evolution course.
+Before you begin, ensure you have the following installed:
 
+- **Java 21** Development Kit (JDK)
+- **Maven** 3.8+ 
+- **Git**
+- An Integrated Development Environment (IDE) like IntelliJ IDEA or Eclipse
 
-### Unit testing and BDD
+## 🚀 Setting Up the Project
 
-*  All tests can be found in the src\test directory. They serve as executable documentation of the source code.
-*  The source code is accompanied by a set of JUnit 5 unit tests. These tests can be written and run in the usual way. If you are not familiar with unit testing or JUnit 5, please refer to https://junit.org/junit5/.
-*  The source code is accompanied by a set of Cucumber BDD scenarios, also running in Junit. If you are not familiar with Cucumber and BDD, please refer to https://cucumber.io/docs/cucumber/.
-The BDD scenarios are specified as .feature files in the src\test\resources directory. Some classes defined in src\test take care of converting these scenarios to executable JUnit tests.
+### 1. Clone Your Forked Repository
 
-### Prerequisites
+```bash
+git clone https://github.com/oscarRickovic/calculator-cucumber-2025.git
+cd calculator-cucumber-2025
+```
 
-*  You will need to have a running version of Java 23 on your machine in order to be able to compile and execute this code, although it is also backward compatible with earlier versions of Java.
-*  You will need to have a running version of Maven, since this project is accompanied by a pom.xml file so that it can be installed, compiled, tested and run using Maven.
+### 3. Build and Verify the Project
 
-### Installation and testing instructions
+```bash
+# Clean and install dependencies
+mvn clean install
 
-*  Upon first use of the code in this repository, you will need to run "mvn clean install" to ensure that all required project dependencies (e.g. for Java, JUnit, Cucumber, and Maven) will be downloaded and installed locally.
-*  Assuming you have a sufficiently recent version of Maven installed (the required versions are specified as properties in the POM file), you can compile the source code using "mvn compile"
-*  Once the code is compiled, you can execute the main class of the Java code using "mvn exec:java" 
-*  The tests and BDD scenarios are executable with Maven using "mvn test"
-*  Note that the tests are also executed when you do a "mvn install". It is possible to skip those tests by providing an extra parameter. For details of more advanced uses of Maven, please refer to its official documentation https://maven.apache.org/guides/.
+# Run tests
+mvn test
 
-### Test coverage and JavaDoc reporting
+# Run the application
+mvn javafx:run
+```
 
-*  In addition to testing the code, "mvn test" will also generate a test coverage report (in HTML format) using JaCoCo. This test coverage is generated in target/site/jacoco.
-*  When packaging the code using "mvn package" the JavaDoc code documentation will be generated and stored in target/site/apidocs.
+## 🤝 Contribution Workflow
 
-## Built With
+### 1. Create a New Branch
 
-*  [Maven](https://maven.apache.org/) - an open source build automation and dependency management tool
-*  [JUnit5](https://junit.org/junit5/) - a unit testing framework for Java
-*  [Cucumber](https://cucumber.io/docs/cucumber/) - a tool for Behaviour-Driven Development
-*  [JaCoCo](https://www.jacoco.org) - a code coverage library for Java
-*  [JavaDoc](https://docs.oracle.com/en/java/javase/21/javadoc/javadoc.html) - a code documentation tool for Java
+- First create new issue, or get an issue from issues bar.
+- Assign the issue to your self, you can assign someone else with you if you want to ofcrs.
+- Add the issue description in the Project page.
+- Create new branch based on "DEV" branch (not master).
 
-## Versions
+```bash
+# Create a new branch for your contribution
+git checkout -b feature/your-feature-name
+# Or for a bugfix
+git checkout -b bugfix/issue-description
+```
 
-We use [SemVer](http://semver.org/) for semantic versioning. For the versions available, see the [tags on this repository](https://github.com/University-of-Mons/calculator-cucumber-2025/tags). 
+### 2. Make Your Changes
 
-## Contributors
+- Follow Java coding conventions
+- Write clear, concise, and meaningful code
+- Add/update unit and integration tests
+- Ensure all tests pass before committing
 
-* Tom Mens
-* Gauvain Devillez @GauvainD
+### 3. Commit Your Changes
 
-## Licence
+Use meaningful commit messages following conventional commit format:
 
+```bash
+# Examples:
+git commit -m "feat: add advanced mathematical operations"
+git commit -m "fix: resolve division by zero error"
+git commit -m "docs: update README with new installation instructions"
+```
 
-[This code is available under the GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/) (GPLv3)
+Commit types:
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `docs:` - Documentation updates
+- `test:` - Test-related changes
+- `refactor:` - Code restructuring
+- `perf:` - Performance improvements
 
-## Acknowledgments
+### 4. Push Your Changes
 
-* Software Engineering Lab, Faculty of Sciences, University of Mons, Belgium.
+```bash
+git push origin feature/your-feature-name
+```
+
+### 5. Create a Pull Request
+
+1. Click "New Pull Request"
+2. Select the base repository's `dev` branch
+3. Provide a clear title and description of your changes
+4. Submit the pull request
+5. wait until the Pull request was approved
+6. close the issue.
+7. make the task `DONE` in project board.
+
+## 🧪 Testing Guidelines
+
+- Write unit tests for new functionality using JUnit 5
+- Use Cucumber for behavior-driven tests
+- Aim for high test coverage
+- Ensure all tests pass: `mvn test`
+
+## 📋 Code Style and Quality
+
+- Follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+- Use meaningful variable and method names
+- Keep methods small and focused
+- Add JavaDoc comments for public methods
+- Run `mvn checkstyle:check` to verify code style
+
+## 🐛 Reporting Issues
+
+1. Check existing issues to avoid duplicates
+2. Use GitHub Issues to report:
+   - Bugs
+   - Feature requests
+   - Performance issues
+3. Provide:
+   - Clear description
+   - Steps to reproduce
+   - Expected vs. actual behavior
+   - Screenshots (if applicable)
+
+## 📚 Documentation
+
+- Update README.md for any significant changes
+- Add/update inline code comments
+- Keep documentation clear and concise
+
+## 🤔 Need Help?
+
+- Open an issue with questions
+- Use GitHub Discussions
+- Check existing documentation
+
+## 📜 Code of Conduct
+
+- Be respectful and inclusive
+- Provide constructive feedback
+- Collaborate and support each other
+
+## 🏆 Thanks!
+
+Your contributions make this project better. We appreciate your time and effort!
+
+### Contributors Hall of Fame
+
+(Maintainers can add a list of contributors here)
+
+---
+
+**Happy Coding! SE7 🚀✨**
+
+@ Kenza Khemar.
+@ Abdelhadi Agourzam
+@ Mohssine 
+@ Mohamed Elismaiyly.
