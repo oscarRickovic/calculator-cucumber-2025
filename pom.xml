@@ -23,23 +23,19 @@
         <sonar.organization>tommens</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
+        <!-- JavaFX version -->
+        <javafx.version>21.0.1</javafx.version>
+
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.version>3.13.0</maven.compiler.version>
-        <!-- As of JDK 23, annotation processing is only run with some explicit configuration
-             of annotation processing or with an explicit request to run annotation processing
-             on the javac command line. This is a change in behavior from the existing default
-             of looking to run annotation processing by searching the class path for processors
-             without any explicit annotation processing related options needing to be present.
-             In order to be enable this in Mavan, we need to turn on full compilation processing: -->
         <maven.compiler.proc>full</maven.compiler.proc>
         <maven.surefire.version>3.5.2</maven.surefire.version>
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
-
     </properties>
 
     <dependencies>
-
+        <!-- Existing dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -70,10 +66,23 @@
             <version>4.13.1</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- JavaFX Dependencies -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Existing plugins -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -96,6 +105,17 @@
                     </properties>
                 </configuration>
             </plugin>
+
+            <!-- JavaFX Maven Plugin -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>calculator.Main</mainClass>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -110,14 +130,11 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <executions>
-                    <!--configures testing coverage-->
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-
-                    <!--generates report in target/site/jacoco-->
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
@@ -138,12 +155,9 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${javadoc.version}</version>
                 <configuration>
-                    <!--needed to prevent module problem-->
                     <detectJavaApiLink>false</detectJavaApiLink>
                 </configuration>
                 <executions>
-                    <!-- Exports JavaDocs to regular HTML files -->
-                    <!--javadoc to target/site/apidocs-->
                     <execution>
                         <id>javadoc-html</id>
                         <phase>package</phase>
@@ -155,5 +169,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

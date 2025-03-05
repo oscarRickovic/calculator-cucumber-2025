@@ -23,7 +23,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-  	Expression e;
+  	/*Expression e;
   	Calculator c = new Calculator();
 
 	try{
@@ -99,7 +99,9 @@ public class Main {
 
 	catch(IllegalConstruction exception) {
 		System.out.println("cannot create operations without parameters");
-		}
+		}*/
+	CalculatorUI.main(args);
  	}
+
 
 }
