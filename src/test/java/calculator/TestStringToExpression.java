@@ -58,11 +58,11 @@ public class TestStringToExpression {
 
         e = StringToExpression.parseStringTExpression("1+2");
         result = c.eval(e); 
-        assertEquals(56, result);
+        assertEquals(3, result);
 
         e = StringToExpression.parseStringTExpression("3*7");
         result = c.eval(e); 
-        assertEquals(56, result);
+        assertEquals(21, result);
      
     }
 
@@ -168,10 +168,33 @@ public class TestStringToExpression {
              assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("1/");
+                StringToExpression.parseStringTExpression("++");
             });
 
+             assertThrows(
+            Exception.class,
+            () -> {
+                StringToExpression.parseStringTExpression("33*/2");
+            });
+
+             assertThrows(
+            Exception.class,
+            () -> {
+                StringToExpression.parseStringTExpression("1+-3");
+            });
             
+
+             assertThrows(
+            Exception.class,
+            () -> {
+                StringToExpression.parseStringTExpression("+4+3");
+            });
+
+             assertThrows(
+            Exception.class,
+            () -> {
+                StringToExpression.parseStringTExpression("<<");
+            });
 
     }
     
