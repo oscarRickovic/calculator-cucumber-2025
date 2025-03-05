@@ -7,5 +7,6 @@ calculator/CucumberTest.class
 calculator/TestMinus.class
 calculator/TestCounting.class
 calculator/TestOperation.class
+calculator/NotationSteps.class
 calculator/TestPlus.class
 calculator/TestEvaluator.class
