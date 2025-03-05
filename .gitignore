@@ -6,4 +6,5 @@
 .idea/*
 *.class
 target/
+.vscode/
 
