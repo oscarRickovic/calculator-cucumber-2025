@@ -9,10 +9,16 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+// adding local packages 
+import calculator.StaticClasses.Parsers.StringToExpression;
+import calculator.Calculator;
+
+
+
 public class CalculatorUI extends Application {
     private TextField display;
     private StringBuilder currentInput = new StringBuilder();
-
+    private Calculator c = new Calculator(); 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("JavaFX Calculator");
@@ -64,7 +70,12 @@ public class CalculatorUI extends Application {
             currentInput.setLength(0);
         } else if (label.equals("=")) {
             // Simulation de l'envoi à l'API (actuellement juste un affichage)
-            display.setText(currentInput.toString());
+            String result = Integer.toString(c.eval(StringToExpression.parseStringTExpression(currentInput.toString())));
+            display.setText(
+                result
+            );
+            currentInput.setLength(0);
+            currentInput.append(result);
             return;
         } else {
             currentInput.append(label);
