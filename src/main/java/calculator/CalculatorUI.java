@@ -65,18 +65,22 @@ public class CalculatorUI extends Application {
         primaryStage.show();
     }
 
-    private void handleButtonClick(String label) {
+    private void handleButtonClick(String label){
         if (label.equals("C")) {
             currentInput.setLength(0);
         } else if (label.equals("=")) {
-            // Simulation de l'envoi à l'API (actuellement juste un affichage)
-            String result = Integer.toString(c.eval(StringToExpression.parseStringTExpression(currentInput.toString())));
-            display.setText(
-                result
-            );
-            currentInput.setLength(0);
-            currentInput.append(result);
-            return;
+            try {
+                // Simulation de l'envoi à l'API (actuellement juste un affichage)
+                String result = Integer.toString(c.eval(StringToExpression.parseStringTExpression(currentInput.toString())));
+                display.setText(
+                    result
+                );
+                currentInput.setLength(0);
+                currentInput.append(result);
+                return;
+            } catch(Exception e) {
+                // do nothing
+            }
         } else {
             currentInput.append(label);
         }
