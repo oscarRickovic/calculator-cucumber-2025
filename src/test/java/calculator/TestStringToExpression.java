@@ -9,9 +9,12 @@ import org.junit.jupiter.api.*;
 import calculator.StaticClasses.Parsers.StringToExpression;
 
 public class TestStringToExpression {
+    
+    Calculator c = new Calculator();
+
     @Test
-    public void StringToExpressionPositiveNumbersTest(){
-        Calculator c = new Calculator();
+    public void StringToExpressionPositiveNumbersTest() throws Exception{
+        
         Expression e = StringToExpression.parseStringTExpression("{(4 * 3) + [2 * 5]} / 5)))");
         int result = c.eval(e); 
         assertEquals(4, result);
@@ -68,134 +71,150 @@ public class TestStringToExpression {
 
     @Test
     public void invalidExpressionTest() {
-        assertThrows(
-            Exception.class,
-            () -> {
-                StringToExpression.parseStringTExpression("{(4----3)}");
-            });
+        
 
         assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("{(((2");
+                c.eval(StringToExpression.parseStringTExpression("{(((2"));
             });
         
         assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("((3+5)*(9-2)");
+                c.eval(StringToExpression.parseStringTExpression("((3+5)*(9-2)"));
             });
         
         assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("a++b");
+                c.eval(StringToExpression.parseStringTExpression("a++b"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("(((a");
+                c.eval(StringToExpression.parseStringTExpression("(((a"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("5+++++8h");
+                c.eval(StringToExpression.parseStringTExpression("5+++++8h"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("hello");
+                c.eval(StringToExpression.parseStringTExpression("hello"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("O+1");
+                c.eval(StringToExpression.parseStringTExpression("O+1"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("O");
+                c.eval(StringToExpression.parseStringTExpression("O"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("o");
+                c.eval(StringToExpression.parseStringTExpression("o"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("{1+3");
+                c.eval(StringToExpression.parseStringTExpression("{1+3"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("1+2/");
+                c.eval(StringToExpression.parseStringTExpression("1+2/"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("2x+y");
+                c.eval(StringToExpression.parseStringTExpression("2x+y"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("111********333");
+                c.eval(StringToExpression.parseStringTExpression("111********333"));
             });
 
             assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("(11+3)++2");
+                c.eval(StringToExpression.parseStringTExpression("(11+3)++2"));
             });
 
 
              assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("1/");
+                c.eval(StringToExpression.parseStringTExpression("1/"));
             });
 
              assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("++");
+                c.eval(StringToExpression.parseStringTExpression("++"));
             });
 
              assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("33*/2");
-            });
-
-             assertThrows(
-            Exception.class,
-            () -> {
-                StringToExpression.parseStringTExpression("1+-3");
+                c.eval(StringToExpression.parseStringTExpression("33*/2"));
             });
             
-
              assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("+4+3");
+                c.eval(StringToExpression.parseStringTExpression("+4+3"));
             });
 
-             assertThrows(
+            assertThrows(
             Exception.class,
             () -> {
-                StringToExpression.parseStringTExpression("<<");
+                c.eval(StringToExpression.parseStringTExpression("<<"));
             });
 
+    }
+
+    @Test
+    public void StringToExpressionNegativeNumbersTest() throws Exception{
+        
+        Expression e = StringToExpression.parseStringTExpression("4 -- 2");
+        int result = c.eval(e); 
+        assertEquals(6, result);
+
+
+        e = StringToExpression.parseStringTExpression("4 - - - 2");
+        result = c.eval(e); 
+        assertEquals(2, result);
+
+        e = StringToExpression.parseStringTExpression("-2 + 4");
+        result = c.eval(e); 
+        assertEquals(2, result);
+
+        e = StringToExpression.parseStringTExpression("-2 + - 2");
+        result = c.eval(e); 
+        assertEquals(-4, result);
+
+
+        e = StringToExpression.parseStringTExpression("(1-(-(-(-1))))");
+        result = c.eval(e); 
+        assertEquals(2, result);
+     
     }
     
 }
