@@ -71,7 +71,7 @@ public class CalculatorUI extends Application {
         } else if (label.equals("=")) {
             try {
                 // Simulation de l'envoi à l'API (actuellement juste un affichage)
-                String result = Integer.toString(c.eval(StringToExpression.parseStringTExpression(currentInput.toString())));
+                String result = c.eval(StringToExpression.parseStringTExpression(currentInput.toString())).toString();
                 display.setText(
                     result
                 );
