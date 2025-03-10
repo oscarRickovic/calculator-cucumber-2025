@@ -13,12 +13,11 @@ import javafx.stage.Stage;
 import calculator.StaticClasses.Parsers.StringToExpression;
 import calculator.Calculator;
 
-
-
 public class CalculatorUI extends Application {
     private TextField display;
     private StringBuilder currentInput = new StringBuilder();
     private Calculator c = new Calculator(); 
+
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("JavaFX Calculator");
@@ -53,6 +52,12 @@ public class CalculatorUI extends Application {
             }
         }
 
+        // Ajout du bouton "⌫" (Backspace) pour supprimer le dernier caractère
+        Button deleteButton = new Button("del");
+        deleteButton.setPrefSize(50, 50);
+        deleteButton.setOnAction(e -> handleDelete());
+        grid.add(deleteButton, 3, row); // Placement à la fin
+
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(10));
@@ -60,31 +65,35 @@ public class CalculatorUI extends Application {
         root.add(display, 0, 0);
         root.add(grid, 0, 1);
 
-        Scene scene = new Scene(root, 250, 300);
+        Scene scene = new Scene(root, 250, 350);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void handleButtonClick(String label){
+    private void handleButtonClick(String label) {
         if (label.equals("C")) {
             currentInput.setLength(0);
         } else if (label.equals("=")) {
             try {
-                // Simulation de l'envoi à l'API (actuellement juste un affichage)
                 String result = Integer.toString(c.eval(StringToExpression.parseStringTExpression(currentInput.toString())));
-                display.setText(
-                    result
-                );
+                display.setText(result);
                 currentInput.setLength(0);
                 currentInput.append(result);
                 return;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // do nothing
             }
         } else {
             currentInput.append(label);
         }
         display.setText(currentInput.toString());
+    }
+
+    private void handleDelete() {
+        if (currentInput.length() > 0) {
+            currentInput.deleteCharAt(currentInput.length() - 1);
+            display.setText(currentInput.toString());
+        }
     }
 
     public static void main(String[] args) {
