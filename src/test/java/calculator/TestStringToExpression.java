@@ -217,4 +217,46 @@ public class TestStringToExpression {
      
     }
     
+    @Test
+    public void StringToExpressionDoubleNumbersTest() throws Exception{
+        Expression e = StringToExpression.parseStringTExpression("3.2 + 2.2");
+        double result = c.eval(e).doubleValue(); 
+        assertEquals(5.4, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("10.5 * 2.0");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(21.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("7.8 - 3.3");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(4.5, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("9.6 / 3.2");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(3.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("5.5 + 2.5");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(8.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("12.75 - 4.25");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(8.5, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("6.0 * 3.5");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(21.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("14.4 / 4.8");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(3.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("(2.2 + 3.3) * 2.0");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(11.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("(10.5 - 2.5) / 2.0");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(4.0, result, 0.0001);
+    }
 }
