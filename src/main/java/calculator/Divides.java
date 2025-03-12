@@ -70,7 +70,7 @@ public final class Divides extends Operation
     public Number op(Number l, Number r) throws Exception {
       // Check for division by zero
       if (r.doubleValue() == 0.0) {
-          throw new Exception("Can't divide by zero");
+        throw new ArithmeticException("Division by zero is not allowed.");
       }
       
       // Determine the highest precision type involved
