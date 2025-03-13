@@ -1,6 +1,7 @@
 package calculator;
 
 import visitor.Visitor;
+import java.util.Objects;
 
 /**
  * MyNumber is a concrete class that represents arithmetic numbers,
@@ -11,23 +12,40 @@ import visitor.Visitor;
  */
 public class MyNumber implements Expression {
     private final Number value;
-    
+    private final ComplexNumber complexValue;
+    private final boolean isComplex;
+
     /**
      * getter method to obtain the value contained in the object
      *
      * @return The number contained in the object
      */
-    public Number getValue() { return value; }
-    
+    public Number getValue() {
+        return isComplex ? complexValue : value;
+    }
+
     /**
-     * Constructor method
+     * Constructor method for real numbers
      *
      * @param v The numeric value to be contained in the object
      */
-    public /*constructor*/ MyNumber(Number v) {
-        value = v;
+    public MyNumber(Number v) {
+        this.value = v;
+        this.complexValue = null;
+        this.isComplex = false;
     }
-    
+
+    /**
+     * Constructor method for complex numbers
+     *
+     * @param complexValue The complex number to be contained in the object
+     */
+    public MyNumber(ComplexNumber complexValue) {
+        this.value = null;
+        this.complexValue = complexValue;
+        this.isComplex = true;
+    }
+
     /**
      * accept method to implement the visitor design pattern to traverse arithmetic expressions.
      * Each number will pass itself to the visitor object to get processed by the visitor.
@@ -37,7 +55,7 @@ public class MyNumber implements Expression {
     public void accept(Visitor v) {
         v.visit(this);
     }
-    
+
     /** The depth of a number expression is always 0
      *
      * @return The depth of a number expression
@@ -45,7 +63,7 @@ public class MyNumber implements Expression {
     public int countDepth() {
         return 0;
     }
-    
+
     /** The number of operations contained in a number expression is always 0
      *
      * @return The number of operations contained in a number expression
@@ -53,7 +71,7 @@ public class MyNumber implements Expression {
     public int countOps() {
         return 0;
     }
-    
+
     /** The number of numbers contained in a number expression is always 1
      *
      * @return The number of numbers contained in a number expression
@@ -61,7 +79,7 @@ public class MyNumber implements Expression {
     public int countNbs() {
         return 1;
     }
-    
+
     /**
      * Convert a number into a String to allow it to be printed.
      *
@@ -69,9 +87,12 @@ public class MyNumber implements Expression {
      */
     @Override
     public String toString() {
-        return value.toString();
+        if (isComplex) {
+            return (complexValue != null) ? complexValue.toString() : "null";
+        }
+        return (value != null) ? value.toString() : "null";
     }
-    
+
     /**
      * Two MyNumber expressions are equal if the values they contain are equal
      *
@@ -80,23 +101,14 @@ public class MyNumber implements Expression {
      */
     @Override
     public boolean equals(Object o) {
-        if (o == null) return false;
-        if (o == this) return true;
-        if (!(o instanceof MyNumber)) return false;
-        
-        MyNumber other = (MyNumber) o;
-        // Handle case where types might be different but values are equal (like Integer 5 and Double 5.0)
-        if (this.value == null) return other.value == null;
-        
-        if (this.value.getClass() != other.value.getClass()) {
-            // Compare as strings for different numeric types
-            return this.value.toString().equals(other.value.toString());
-        }
-        
-        // Safe to compare directly when types match
-        return this.value.equals(other.value);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MyNumber myNumber = (MyNumber) o;
+        return isComplex == myNumber.isComplex &&
+                Objects.equals(value, myNumber.value) &&
+                Objects.equals(complexValue, myNumber.complexValue);
     }
-    
+
     /**
      * The method hashCode needs to be overridden if the equals method is overridden
      *
@@ -104,6 +116,6 @@ public class MyNumber implements Expression {
      */
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return Objects.hash(value, complexValue, isComplex);
     }
 }

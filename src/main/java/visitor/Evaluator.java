@@ -1,5 +1,6 @@
 package visitor;
 
+import calculator.ComplexNumber;
 import calculator.Expression;
 import calculator.MyNumber;
 import calculator.Operation;
@@ -49,7 +50,13 @@ public class Evaluator extends Visitor {
         int max = evaluatedArgs.size();
         for(int counter=1; counter<max; counter++) {
             try {
-                temp = o.op(temp,evaluatedArgs.get(counter));
+                if (temp instanceof ComplexNumber || evaluatedArgs.get(counter) instanceof ComplexNumber) {
+                    ComplexNumber c1 = (temp instanceof ComplexNumber) ? (ComplexNumber) temp : new ComplexNumber(temp.doubleValue(), 0);
+                    ComplexNumber c2 = (evaluatedArgs.get(counter) instanceof ComplexNumber) ? (ComplexNumber) evaluatedArgs.get(counter) : new ComplexNumber(evaluatedArgs.get(counter).doubleValue(), 0);
+                    temp = o.op(c1, c2);
+                } else {
+                    temp = o.op(temp, evaluatedArgs.get(counter));
+                }
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

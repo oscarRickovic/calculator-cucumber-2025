@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
@@ -16,7 +17,8 @@ import calculator.Calculator;
 public class CalculatorUI extends Application {
     private TextField display;
     private StringBuilder currentInput = new StringBuilder();
-    private Calculator c = new Calculator(); 
+    private Calculator c = new Calculator();
+    private boolean complexMode = false;
 
     @Override
     public void start(Stage primaryStage) {
@@ -27,7 +29,8 @@ public class CalculatorUI extends Application {
         display.setPrefHeight(50);
 
         GridPane grid = createButtonGrid();
-
+        ToggleButton toggleComplex = new ToggleButton("Complex Mode");
+        toggleComplex.setOnAction(e -> complexMode = toggleComplex.isSelected());
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(10));
@@ -47,13 +50,7 @@ public class CalculatorUI extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        String[] buttons = {
-                "7", "8", "9", "/",
-                "4", "5", "6", "*",
-                "1", "2", "3", "-",
-                "0", ".", "C", "+",
-                "="
-        };
+        String[] buttons = {"7", "8", "9", "/", "4", "5", "6", "*", "1", "2", "3", "-", "0", ".", "i", "+", "="};
 
         int row = 1, col = 0;
         for (String label : buttons) {
@@ -110,11 +107,21 @@ public class CalculatorUI extends Application {
 
     private void evaluateExpression() {
         try {
-            String result = c.eval(StringToExpression.parseStringTExpression(currentInput.toString())).toString();
+
+            Expression parsedExpression = StringToExpression.parseStringTExpression(currentInput.toString());
+
+            if (parsedExpression == null) {
+                display.setText("Parsing Error");
+                return;
+            }
+
+            String result = c.eval(parsedExpression).toString();
+
             display.setText(result);
             currentInput.setLength(0);
             currentInput.append(result);
         } catch (Exception e) {
+            e.printStackTrace();
             display.setText("Error");
             currentInput.setLength(0);
         }
