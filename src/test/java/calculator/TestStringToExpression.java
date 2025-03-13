@@ -16,55 +16,55 @@ public class TestStringToExpression {
     public void StringToExpressionPositiveNumbersTest() throws Exception{
         
         Expression e = StringToExpression.parseStringTExpression("{(4 * 3) + [2 * 5]} / 5)))");
-        int result = c.eval(e); 
+        int result = c.eval(e).intValue(); 
         assertEquals(4, result);
 
 
         e = StringToExpression.parseStringTExpression("50 - 3 * 4 + 10 - 2 * 5 + 8 * 2");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(54, result);
 
         e = StringToExpression.parseStringTExpression("(10 + 5) * 3 - (8 - 2) * 4 + 6");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(27, result);
 
         e = StringToExpression.parseStringTExpression("((10 + 2) * 3 - 5) + ((8 - 4) * 6) - (7 * 2) + 9");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(50, result);
 
 
         e = StringToExpression.parseStringTExpression("10 * 3 - 5 * 2");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(20, result);
 
 
         e = StringToExpression.parseStringTExpression("5 + 10 * 2 - 3");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(22, result);
 
 
         e = StringToExpression.parseStringTExpression("(5 + 3) * 2 - (4 - 2) * 3");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(10, result);
 
         e = StringToExpression.parseStringTExpression("1000 - 5 * 200 + 50");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(50, result);
 
         e = StringToExpression.parseStringTExpression("((10 + 5) * (3 - 2) + (8 * 2)) - (6 * (4 - 2)) + 9");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(28, result);
 
         e = StringToExpression.parseStringTExpression("(3 + 5) * (9 - 2) ");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(56, result);
 
         e = StringToExpression.parseStringTExpression("1+2");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(3, result);
 
         e = StringToExpression.parseStringTExpression("3*7");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(21, result);
      
     }
@@ -194,27 +194,69 @@ public class TestStringToExpression {
     public void StringToExpressionNegativeNumbersTest() throws Exception{
         
         Expression e = StringToExpression.parseStringTExpression("4 -- 2");
-        int result = c.eval(e); 
+        int result = c.eval(e).intValue(); 
         assertEquals(6, result);
 
 
         e = StringToExpression.parseStringTExpression("4 - - - 2");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(2, result);
 
         e = StringToExpression.parseStringTExpression("-2 + 4");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(2, result);
 
         e = StringToExpression.parseStringTExpression("-2 + - 2");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(-4, result);
 
 
         e = StringToExpression.parseStringTExpression("(1-(-(-(-1))))");
-        result = c.eval(e); 
+        result = c.eval(e).intValue(); 
         assertEquals(2, result);
      
     }
     
+    @Test
+    public void StringToExpressionDoubleNumbersTest() throws Exception{
+        Expression e = StringToExpression.parseStringTExpression("3.2 + 2.2");
+        double result = c.eval(e).doubleValue(); 
+        assertEquals(5.4, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("10.5 * 2.0");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(21.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("7.8 - 3.3");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(4.5, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("9.6 / 3.2");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(3.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("5.5 + 2.5");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(8.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("12.75 - 4.25");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(8.5, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("6.0 * 3.5");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(21.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("14.4 / 4.8");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(3.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("(2.2 + 3.3) * 2.0");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(11.0, result, 0.0001);
+
+        e = StringToExpression.parseStringTExpression("(10.5 - 2.5) / 2.0");
+        result = c.eval(e).doubleValue(); 
+        assertEquals(4.0, result, 0.0001);
+    }
 }

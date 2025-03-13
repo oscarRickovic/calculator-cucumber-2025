@@ -31,7 +31,7 @@ public class StringToExpression {
         for (int i = 0; i < expr.length(); i++) {
             char ch = expr.charAt(i);
     
-            if (Character.isDigit(ch)) {
+            if (Character.isDigit(ch) || ch == '.') {
                 if (unaryMinusCount % 2 != 0) {
                     numBuffer.append('-'); // Apply unary minus only if odd count
                 }
@@ -79,7 +79,7 @@ public class StringToExpression {
         Stack<String> operators = new Stack<>();
     
         for (String token : tokens) {
-            if (token.matches("-?\\d+")) {
+            if (token.matches("-?\\d+(\\.\\d+)?")) {
                 output.add(token);
             } else if ("+-*/~".contains(token)) {
                 while (!operators.isEmpty() && 
@@ -109,8 +109,13 @@ public class StringToExpression {
         Stack<Expression> stack = new Stack<>();
     
         for (String token : postfix) {
-            if (token.matches("-?\\d+")) {
-                stack.push(new MyNumber(Integer.parseInt(token)));
+            if (token.matches("-?\\d+(\\.\\d+)?")) {
+                // Check if the number contains a decimal point
+                if (token.contains(".")) {
+                    stack.push(new MyNumber(Double.parseDouble(token)));
+                } else {
+                    stack.push(new MyNumber(Integer.parseInt(token)));
+                }
             } else if (token.equals("~")) {
                 // Handle unary negation
                 if (stack.isEmpty()) return null;
@@ -138,18 +143,18 @@ public class StringToExpression {
 
     public static void main(String[] args){
         Calculator c = new Calculator();
-        // Test with a variety of expressions including negative numbers
+        // Test with a variety of expressions including negative numbers and decimals
         String[] testExpressions = {
-            "{(4 * 3) + [2 * 5]} / 5)))",
-            "2 + 3 + 5 / 2",
-            "-2 + 3",
-            "3 - 2",
-            "3-2",
-            "3 -2",
-            "-2+3",
-            "5*-2",
-            "-3*-4",
-            "(-5+3)*2"
+            "{(4.5 * 3) + [2 * 5.25]} / 5)))",
+            "2.5 + 3 + 5 / 2.2",
+            "-2.5 + 3",
+            "3 - 2.75",
+            "3.33-2",
+            "3 -2.1",
+            "-2.0+3",
+            "5*-2.5",
+            "-3.14*-4",
+            "(-5.5+3)*2"
         };
         
         for (String expr : testExpressions) {
@@ -158,7 +163,7 @@ public class StringToExpression {
                 Expression result = parseStringTExpression(expr);
                 c.print(result);
             } catch(Exception e ) {
-                System.out.println("error in the expression");
+                System.out.println("Error in the expression: " + e.getMessage());
             }
             
         }

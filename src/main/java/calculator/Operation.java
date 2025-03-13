@@ -97,6 +97,8 @@ public abstract class Operation implements Expression
 	 * @return	result of computing the binary operation
 	 */
    public abstract int op(int l, int r);
+
+   public abstract Number op(Number l, Number r) throws Exception;
     // the operation itself is specified in the subclasses
 
 	/** Add more parameters to the existing list of parameters
@@ -230,7 +232,6 @@ public abstract class Operation implements Expression
 	public void handleNotationNestedConflict() {
 		for (Expression e : this.args) {
 			if (e instanceof Operation op && op.notation != this.notation) {
-				System.out.println("the owner notation : " + this.notation + " the child notation " + op.notation);
 				op.notation = (this.notation == null ? Notation.INFIX : this.notation);
 				op.handleNotationNestedConflict();
 			}
