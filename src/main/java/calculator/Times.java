@@ -1,6 +1,6 @@
 package calculator;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /** This class represents the arithmetic multiplication operation "*".
@@ -13,6 +13,8 @@ import java.util.List;
  */
 public final class Times extends Operation
  {
+
+  protected static final List<String> SYMBOLES = new ArrayList<>(List.of("x", "*"));
   /**
    * Class constructor specifying a number of Expressions to multiply.
    *
@@ -41,7 +43,7 @@ public final class Times extends Operation
   }
 
   public Times(Notation n, Expression... elist) throws IllegalConstruction {
-  	super(Arrays.asList(elist),n);
+  	super(n, elist);
   	symbol = "*";
   	neutral = 1;
   }
@@ -54,4 +56,20 @@ public final class Times extends Operation
    */
   public int op(int l, int r)
     { return (l*r); }
+
+  public Number op(Number l, Number r) {
+    if (l instanceof Double || r instanceof Double) {
+        return l.doubleValue() * r.doubleValue();
+    } else if (l instanceof Float || r instanceof Float) {
+        return l.floatValue() * r.floatValue();
+    } else if (l instanceof Long || r instanceof Long) {
+        return l.longValue() * r.longValue();
+    } else if (l instanceof Integer || r instanceof Integer) {
+        return l.intValue() * r.intValue();
+    } else if (l instanceof Short || r instanceof Short) {
+        return l.shortValue() * r.shortValue();
+    } else {
+        return l.byteValue() * r.byteValue();
+    }
+  }
 }

@@ -59,23 +59,26 @@ public abstract class Operation implements Expression
 	protected /*constructor*/ Operation(List<Expression> elist,Notation n)
 			throws IllegalConstruction
 	{
-		if (elist == null) {
-			throw new IllegalConstruction(); }
-		else {
-			args = new ArrayList<>(elist);
-		}
-		if (n!=null) notation = n;
+		operationConstructor(elist, n);
 	}
 
 	protected Operation(Notation n, Expression... elements)
 			throws IllegalConstruction
 	{
-		if (elements.length == 0) {
+		operationConstructor(Arrays.asList(elements), n);
+		
+	}
+
+	protected void operationConstructor(List<Expression> elist, Notation n) 
+		throws IllegalConstruction
+	{
+		if (n != null) notation = n;
+		if (elist == null) {
 			throw new IllegalConstruction(); }
 		else {
-			args = Arrays.asList(elements);
+			args = new ArrayList<>(elist);
+			handleNotationNestedConflict();
 		}
-		if (n!=null) notation = n;
 	}
 
 	/**
@@ -94,6 +97,8 @@ public abstract class Operation implements Expression
 	 * @return	result of computing the binary operation
 	 */
    public abstract int op(int l, int r);
+
+   public abstract Number op(Number l, Number r) throws Exception;
     // the operation itself is specified in the subclasses
 
 	/** Add more parameters to the existing list of parameters
@@ -220,5 +225,16 @@ public abstract class Operation implements Expression
 		result = prime * result + args.hashCode();
 		return result;
 	}
+	
+	// Avoid nested different types of notation in a parent notation.
+	// In nested expression we respect the parent notation.
 
+	public void handleNotationNestedConflict() {
+		for (Expression e : this.args) {
+			if (e instanceof Operation op && op.notation != this.notation) {
+				op.notation = (this.notation == null ? Notation.INFIX : this.notation);
+				op.handleNotationNestedConflict();
+			}
+		}
+	}
 }

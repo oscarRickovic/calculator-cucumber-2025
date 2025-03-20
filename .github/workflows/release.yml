@@ -1,0 +1,49 @@
+name: Release Reporting
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Test Project
+        run: mvn clean install
+
+      - name: Generate JavaDoc
+        run: mvn javadoc:javadoc
+
+      - name: Run Coverage and Quality Analysis
+        run: |
+          mvn jacoco:report
+          mvn pmd:pmd
+          mvn checkstyle:checkstyle
+          mvn spotbugs:spotbugs
+
+      - name: Package reports
+        run: |
+          mkdir release-reports
+          cp -r target/site/jacoco release-reports/
+          cp target/site/pmd.xml release-reports/
+          cp target/site/checkstyle.xml release-reports/
+          cp target/site/spotbugs.xml release-reports/
+          cp -r target/site/apidocs release-reports/
+          tar -czf reports.tar.gz release-reports
+
+      - name: Upload reports to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: reports.tar.gz

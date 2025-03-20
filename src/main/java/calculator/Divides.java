@@ -2,6 +2,7 @@ package calculator;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,6 +16,8 @@ import java.util.List;
  */
 public final class Divides extends Operation
 {
+
+  protected static final List<String> SYMBOLES = new ArrayList<>(List.of("/"));
 
   /**
    * Class constructor specifying a number of Expressions to divide.
@@ -44,7 +47,7 @@ public final class Divides extends Operation
   }
 
   public Divides(Notation n, Expression... elist) throws IllegalConstruction {
-    super(Arrays.asList(elist),n);
+    super(n, elist);
     symbol = "/";
     neutral = 1;
   }
@@ -63,5 +66,27 @@ public final class Divides extends Operation
         }
         return l / r;
     }
+
+    public Number op(Number l, Number r) throws Exception {
+      // Check for division by zero
+      if (r.doubleValue() == 0.0) {
+        throw new ArithmeticException("Division by zero is not allowed.");
+      }
+      
+      // Determine the highest precision type involved
+      if (l instanceof Double || r instanceof Double) {
+          return l.doubleValue() / r.doubleValue();
+      } else if (l instanceof Float || r instanceof Float) {
+          return l.floatValue() / r.floatValue();
+      } else if (l instanceof Long || r instanceof Long) {
+          return l.longValue() / r.longValue();
+      } else if (l instanceof Integer || r instanceof Integer) {
+          return l.intValue() / r.intValue();
+      } else if (l instanceof Short || r instanceof Short) {
+          return l.shortValue() / r.shortValue();
+      } else {
+          return l.byteValue() / r.byteValue();
+      }
+  }
 
 }
