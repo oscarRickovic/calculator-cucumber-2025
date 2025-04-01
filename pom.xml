@@ -1,7 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>calculator</groupId>
     <artifactId>calculator-cucumber</artifactId>
     <version>0.5.0</version>
@@ -23,6 +24,9 @@
         <sonar.organization>tommens</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
+        <!-- Spring Boot version -->
+        <spring-boot.version>3.2.3</spring-boot.version>
+
         <!-- JavaFX version -->
         <javafx.version>21.0.1</javafx.version>
 
@@ -35,7 +39,7 @@
     </properties>
 
     <dependencies>
-        <!-- Existing dependencies -->
+        <!-- JUnit and Cucumber dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -78,11 +82,34 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+
+        <!-- Spring Boot dependencies for REST API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Existing plugins -->
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <configuration>
+                    <mainClass>calculator.MainSpringBoot</mainClass> <!-- Classe principale Spring Boot -->
+                </configuration>
+            </plugin>
+
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -93,6 +120,8 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+
+            <!-- Maven Surefire Plugin for tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -112,19 +141,21 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>calculator.Main</mainClass>
+                    <mainClass>calculator.MainSpringBoot</mainClass> <!-- Classe principale Spring Boot -->
                 </configuration>
             </plugin>
 
+            <!-- Exec Maven Plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
-                    <mainClass>calculator.Main</mainClass>
+                    <mainClass>calculator.MainSpringBoot</mainClass>
                 </configuration>
             </plugin>
 
+            <!-- Jacoco for code coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -149,24 +180,54 @@
                     </excludes>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${javadoc.version}</version>
-                <configuration>
-                    <detectJavaApiLink>false</detectJavaApiLink>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>javadoc-html</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Profil pour Spring Boot -->
+        <profile>
+            <id>spring-boot</id>
+            <activation>
+                <property>
+                    <name>spring-boot.active</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <!-- Spring Boot Dependencies -->
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                    <version>${spring-boot.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-test</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <!-- Spring Boot Plugin pour le build -->
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot.version}</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profil sans Spring Boot -->
+        <profile>
+            <id>no-spring-boot</id>
+            <activation>
+                <property>
+                    <name>spring-boot.active</name>
+                    <value>false</value>
+                </property>
+            </activation>
+        </profile>
+    </profiles>
 </project>
