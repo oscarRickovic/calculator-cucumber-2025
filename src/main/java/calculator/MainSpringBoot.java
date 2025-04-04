@@ -12,4 +12,3 @@ public class MainSpringBoot {
         SpringApplication.run(MainSpringBoot.class, args);
     }
 }
-
