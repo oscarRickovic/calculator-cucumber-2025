@@ -29,7 +29,12 @@ public class CalculatorController {
         logger.info("Expression reçue: {}", expression);
 
         try {
-            // Parser l'expression
+
+            if (!expression.matches("[0-9+\\-*/().]+")) {
+                logger.error("❌ Expression invalide détectée: {}", expression);
+                return ResponseEntity.badRequest().body("Expression invalide.");
+            }
+           
             Expression parsedExpression = StringToExpression.parseStringTExpression(expression);
             logger.info("Expression parsée avec succès: {}", parsedExpression);
 
