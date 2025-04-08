@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import calculator.Calculator;
@@ -15,6 +14,10 @@ import calculator.MyNumber;
 import calculator.MyComplexNumber;
 import calculator.Plus;
 import calculator.Times;
+import calculator.Sin;
+import calculator.Cos;
+import calculator.Ln;
+import calculator.Exp;
 import calculator.StaticClasses.StaticHelpers;
 
 /**
@@ -26,6 +29,9 @@ public class StringToExpression {
     // Pattern to detect standalone complex numbers like 3+4i, -2-3i, 4i, etc.
     private static final Pattern COMPLEX_PATTERN = 
         Pattern.compile("^\\s*(-?\\d*\\.?\\d*)([-+]\\d*\\.?\\d*)?i\\s*$");
+        
+    // Valid function names (all lowercase)
+    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "ln", "exp");
 
     /**
      * Parse a string representation of an arithmetic expression into an Expression object.
@@ -45,7 +51,10 @@ public class StringToExpression {
         }
         
         try {
-            List<String> tokens = tokenize(stringExpression);
+            // Lowercase function names for case-insensitive parsing
+            String normalizedExpression = normalizeFunctionNames(stringExpression);
+            
+            List<String> tokens = tokenize(normalizedExpression);
             List<String> postfix = infixToPostfix(tokens);
             Expression result = buildExpressionTree(postfix);
             
@@ -57,6 +66,18 @@ public class StringToExpression {
         } catch (Exception e) {
             throw new Exception("Error parsing expression '" + stringExpression + "': " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Normalize function names to lowercase for case-insensitive parsing.
+     */
+    private static String normalizeFunctionNames(String expr) {
+        String result = expr;
+        for (String funcName : FUNCTION_NAMES) {
+            // Case-insensitive replacement
+            result = result.replaceAll("(?i)" + funcName, funcName);
+        }
+        return result;
     }
 
     /**
@@ -77,9 +98,14 @@ public class StringToExpression {
         boolean expectOperand = true; // True at start or after an operator or opening bracket
         int unaryMinusCount = 0; // Count consecutive unary minuses
         
+        // Pre-process: handle function calls
+        for (String funcName : FUNCTION_NAMES) {
+            expr = expr.replaceAll("\\b" + funcName + "\\s*\\(", funcName + " ( ");
+        }
+        
         // Pre-process: insert spaces around operators and brackets for easier tokenization
         expr = expr.replaceAll("\\s+", " ")  // Normalize whitespace
-                  .replaceAll("([\\+\\-\\*\\/\\(\\)\\[\\]\\{\\}])", " $1 ")  // Add spaces around operators and brackets
+                  .replaceAll("([\\+\\-\\*\\/\\(\\)\\[\\]\\{\\}\\,])", " $1 ")  // Add spaces around operators, brackets, and commas
                   .replaceAll("\\s+", " ")  // Normalize whitespace again
                   .trim();  // Remove leading/trailing whitespace
         
@@ -87,6 +113,16 @@ public class StringToExpression {
         
         for (String part : parts) {
             if (part.isEmpty()) continue;
+            
+            // Check if it's a function name
+            if (FUNCTION_NAMES.contains(part.toLowerCase())) {
+                if (unaryMinusCount > 0) {
+                    throw new IllegalArgumentException("Cannot apply unary minus directly to a function name");
+                }
+                tokens.add(part.toLowerCase());
+                expectOperand = false;  // Function name is followed by opening parenthesis, not an operand
+                continue;
+            }
             
             // Check if it's a standalone complex number
             if (isStandaloneComplexNumber(part)) {
@@ -129,6 +165,13 @@ public class StringToExpression {
                     tokens.add(part);
                 }
                 expectOperand = false;
+                continue;
+            }
+            
+            // Check if it's a comma (for function arguments)
+            if (part.equals(",")) {
+                tokens.add(part);
+                expectOperand = true;
                 continue;
             }
             
@@ -191,25 +234,47 @@ public class StringToExpression {
     
     /**
      * Convert an infix expression to postfix (Reverse Polish Notation) using the Shunting-yard algorithm.
+     * Modified to handle function calls.
      */
     private static List<String> infixToPostfix(List<String> tokens) {
-        // Define operator precedence
+        // Define operator and function precedence
         Map<String, Integer> precedence = Map.of(
             "+", 1, 
             "-", 1, 
             "*", 2, 
             "/", 2, 
-            "u-", 3  // Unary minus has higher precedence
+            "u-", 3,  // Unary minus has higher precedence
+            "sin", 4, // Functions have highest precedence
+            "cos", 4,
+            "ln", 4,
+            "exp", 4
         );
         
         List<String> output = new ArrayList<>();
         Stack<String> operators = new Stack<>();
         
-        for (String token : tokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            String token = tokens.get(i);
+            
             // Numbers and complex numbers go straight to output
             if (token.matches("-?\\d+(\\.\\d+)?") || isComplexNumber(token)) {
                 output.add(token);
             } 
+            // Handle function names
+            else if (FUNCTION_NAMES.contains(token)) {
+                operators.push(token);
+            }
+            // Handle commas (function argument separators)
+            else if (token.equals(",")) {
+                // Pop operators until we find a left parenthesis
+                while (!operators.isEmpty() && !StaticHelpers.openingBrackets.contains(operators.peek())) {
+                    output.add(operators.pop());
+                }
+                // If we didn't find a left parenthesis, there's a mismatched parenthesis
+                if (operators.isEmpty() || !StaticHelpers.openingBrackets.contains(operators.peek())) {
+                    throw new IllegalArgumentException("Mismatched parentheses or invalid comma placement");
+                }
+            }
             // Handle unary minus and binary operators
             else if ("+-*/u-".contains(token)) {
                 while (!operators.isEmpty() && 
@@ -233,6 +298,11 @@ public class StringToExpression {
                 if (!operators.isEmpty() && 
                     StaticHelpers.openingBrackets.contains(operators.peek())) {
                     operators.pop(); // Discard the opening bracket
+                    
+                    // If the token at the top of the operator stack is a function token, pop it onto the output queue
+                    if (!operators.isEmpty() && FUNCTION_NAMES.contains(operators.peek())) {
+                        output.add(operators.pop());
+                    }
                 } else {
                     throw new IllegalArgumentException("Mismatched brackets");
                 }
@@ -257,9 +327,24 @@ public class StringToExpression {
      * Check if a token represents a complex number.
      */
     private static boolean isComplexNumber(String token) {
-        return token.contains("i");
+        // First, check if it's a function name - these are not complex numbers
+        if (FUNCTION_NAMES.contains(token.toLowerCase())) {
+            return false;
+        }
+        
+        // Check for standalone i or -i
+        if (token.equals("i") || token.equals("-i")) {
+            return true;
+        }
+        
+        // Check for patterns like 3+4i, 2i, etc.
+        // This regex ensures the 'i' appears at the end or as part of a numeric pattern
+        return token.matches(".*\\d+i$") || 
+               token.matches(".*\\d+\\.\\d+i$") ||
+               token.matches(".*[-+]\\d+i$") || 
+               token.matches(".*[-+]\\d+\\.\\d+i$") ||
+               COMPLEX_PATTERN.matcher(token).matches();
     }
-    
     /**
      * Build an expression tree from a postfix expression.
      */
@@ -299,6 +384,22 @@ public class StringToExpression {
                 // Create a minus expression with 0 as the left operand
                 stack.push(new Minus(null, new MyNumber(0), operand));
             } 
+            // Handle functions (unary operations)
+            else if (FUNCTION_NAMES.contains(token)) {
+                if (stack.isEmpty()) {
+                    throw new IllegalArgumentException("Invalid expression: missing operand for " + token);
+                }
+                
+                Expression operand = stack.pop();
+                
+                switch (token) {
+                    case "sin": stack.push(new Sin(null, operand)); break;
+                    case "cos": stack.push(new Cos(null, operand)); break;
+                    case "ln": stack.push(new Ln(null, operand)); break;
+                    case "exp": stack.push(new Exp(null, operand)); break;
+                    default: throw new IllegalArgumentException("Unsupported function: " + token);
+                }
+            }
             // Handle binary operators
             else if ("+-*/".contains(token)) {
                 if (stack.size() < 2) {
@@ -328,32 +429,25 @@ public class StringToExpression {
     }
 
     /**
-     * Test method to validate parsing of various expressions, including complex numbers.
+     * Test method to validate parsing of various expressions, including complex numbers and functions.
      */
     public static void main(String[] args) {
         Calculator c = new Calculator();
         
-        // Test with a variety of expressions including complex numbers
+        // Test with a variety of expressions including complex numbers and functions
         String[] testExpressions = {
-            "3+4i",
-            "3+4i + 2-i",
-            "(3+4i) * (2-i)",
-            "5 + 3i",
-            "i + i",
-            "2 * (3+4i)",
-            "4 -- 2",
-            "4 - - - 2",
-            "2.5 + 3 + 5 / 2.2",
-            "-2.5 + 3",
-            "3 - 2.75",
-            "3.33-2",
-            "3 -2.1",
-            "-2.0+3",
-            "5*-2.5",
-            "-3.14*-4",
-            "(-5.5+3)*2",
-            "50 - 3 * 4 + 10 - 2 * 5 + 8 * 2",
-            "3.2 + 2.2"
+            "sin(3.14159265359/2)",
+            "sin(1+2)",
+            "cos(0)",
+            "ln(1)",
+            "exp(0)",
+            "3+4i + sin(1,2)",  // Complex number addition with sine of complex number
+            "sin(3+4i)",        // Sine of a complex number
+            "exp(3.14159265359)",
+            "2 * sin(3.14159265359/6)",
+            "1 + cos(0) + 2",
+            "sin(cos(0))",       // Nested functions
+            "3+4i * cos(3.14159265359)"  // Complex number multiplied by cosine
         };
         
         for (String expr : testExpressions) {

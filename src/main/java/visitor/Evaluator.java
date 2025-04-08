@@ -8,6 +8,11 @@ import calculator.Plus;
 import calculator.Minus;
 import calculator.Times;
 import calculator.Divides;
+import calculator.Sin;
+import calculator.Cos;
+import calculator.Ln;
+import calculator.Exp;
+import calculator.UnaryOperation;
 
 import java.util.ArrayList;
 
@@ -65,6 +70,12 @@ public class Evaluator extends Visitor {
             }
         }
         
+        // Handle unary operations separately
+        if (o instanceof UnaryOperation && evaluatedArgs.size() == 1) {
+            handleUnaryOperation(o, evaluatedArgs.get(0), hasComplexOperand);
+            return;
+        }
+        
         // If any operand is complex, convert all operands to complex
         if (hasComplexOperand) {
             // Convert any real numbers to complex numbers
@@ -107,6 +118,27 @@ public class Evaluator extends Visitor {
             }
             
             computedValue = temp;
+        }
+    }
+    
+    /**
+     * Handle unary operation evaluation (sin, cos, ln, exp)
+     * 
+     * @param o The operation (must implement UnaryOperation)
+     * @param arg The evaluated argument
+     * @param isComplex Whether the argument is a complex number
+     */
+    private void handleUnaryOperation(Operation o, Object arg, boolean isComplex) {
+        UnaryOperation unaryOp = (UnaryOperation) o;
+        
+        if (isComplex) {
+            // Handle complex number
+            MyComplexNumber z = (MyComplexNumber) arg;
+            computedValue = unaryOp.opUnaryComplex(z);
+        } else {
+            // Handle real number
+            Number n = (Number) arg;
+            computedValue = unaryOp.opUnary(n);
         }
     }
     
