@@ -8,6 +8,7 @@ import calculator.Plus;
 import calculator.Minus;
 import calculator.Times;
 import calculator.Divides;
+import calculator.Power;
 import calculator.Sin;
 import calculator.Cos;
 import calculator.Ln;
@@ -100,6 +101,8 @@ public class Evaluator extends Visitor {
                     result = complexMultiply(result, next);
                 } else if (o instanceof Divides) {
                     result = complexDivide(result, next);
+                } else if (o instanceof Power) {
+                    result = complexPower(result, next);
                 }
             }
             
@@ -201,5 +204,73 @@ public class Evaluator extends Visitor {
         double imagPart = (b * c - a * d) / denominator;
         
         return new MyComplexNumber(realPart, imagPart);
+    }
+    
+    /**
+     * Raise a complex number to a complex power.
+     * For z1^z2, we use: z1^z2 = exp(z2 * ln(z1))
+     */
+    private MyComplexNumber complexPower(MyComplexNumber z1, MyComplexNumber z2) {
+        // Special case: If base is 0 and exponent has positive real part
+        double baseReal = z1.getRealPart().doubleValue();
+        double baseImag = z1.getImaginaryPart().doubleValue();
+        double expReal = z2.getRealPart().doubleValue();
+        double expImag = z2.getImaginaryPart().doubleValue();
+        
+        // Check if base is zero
+        if (baseReal == 0 && baseImag == 0) {
+            if (expReal > 0) {
+                // 0^z = 0 for Re(z) > 0
+                return new MyComplexNumber(0, 0);
+            } else {
+                throw new ArithmeticException("Cannot raise zero to a power with non-positive real part");
+            }
+        }
+        
+        // For real exponents with integer values, we can use direct computation
+        if (expImag == 0 && expReal == Math.floor(expReal) && expReal >= 0 && expReal <= 100) {
+            // Integer power calculation (more efficient for small integer powers)
+            return integerComplexPower(z1, (int)expReal);
+        }
+        
+        // General case: z1^z2 = exp(z2 * ln(z1))
+        // First calculate ln(z1)
+        double r = Math.sqrt(baseReal * baseReal + baseImag * baseImag);
+        double theta = Math.atan2(baseImag, baseReal);
+        
+        // ln(z1) = ln(r) + i*theta
+        double lnReal = Math.log(r);
+        double lnImag = theta;
+        
+        // Multiply z2 * ln(z1)
+        double productReal = expReal * lnReal - expImag * lnImag;
+        double productImag = expReal * lnImag + expImag * lnReal;
+        
+        // exp(z2 * ln(z1))
+        double resultReal = Math.exp(productReal) * Math.cos(productImag);
+        double resultImag = Math.exp(productReal) * Math.sin(productImag);
+        
+        return new MyComplexNumber(resultReal, resultImag);
+    }
+    
+    /**
+     * Compute integer powers of complex numbers more efficiently
+     */
+    private MyComplexNumber integerComplexPower(MyComplexNumber base, int exponent) {
+        if (exponent == 0) {
+            return new MyComplexNumber(1, 0);
+        }
+        
+        if (exponent == 1) {
+            return base;
+        }
+        
+        // For small positive integer exponents, use repeated multiplication
+        MyComplexNumber result = new MyComplexNumber(1, 0);
+        for (int i = 0; i < exponent; i++) {
+            result = complexMultiply(result, base);
+        }
+        
+        return result;
     }
 }

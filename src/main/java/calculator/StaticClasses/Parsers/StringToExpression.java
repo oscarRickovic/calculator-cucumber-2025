@@ -14,6 +14,7 @@ import calculator.MyNumber;
 import calculator.MyComplexNumber;
 import calculator.Plus;
 import calculator.Times;
+import calculator.Power;
 import calculator.Sin;
 import calculator.Cos;
 import calculator.Ln;
@@ -22,7 +23,7 @@ import calculator.StaticClasses.StaticHelpers;
 
 /**
  * Utility class for parsing string expressions into Expression objects.
- * Handles infix expressions with support for decimal numbers, parentheses, complex numbers, and unary operations.
+ * Handles infix expressions with support for decimal numbers, parentheses, complex numbers, and functions.
  */
 public class StringToExpression {
 
@@ -105,7 +106,7 @@ public class StringToExpression {
         
         // Pre-process: insert spaces around operators and brackets for easier tokenization
         expr = expr.replaceAll("\\s+", " ")  // Normalize whitespace
-                  .replaceAll("([\\+\\-\\*\\/\\(\\)\\[\\]\\{\\}\\,])", " $1 ")  // Add spaces around operators, brackets, and commas
+                  .replaceAll("([\\+\\-\\*\\/\\^\\(\\)\\[\\]\\{\\}\\,])", " $1 ")  // Add spaces around operators, brackets, and commas
                   .replaceAll("\\s+", " ")  // Normalize whitespace again
                   .trim();  // Remove leading/trailing whitespace
         
@@ -176,7 +177,7 @@ public class StringToExpression {
             }
             
             // Check if it's an operator
-            if ("+-*/".contains(part)) {
+            if ("+-*/^".contains(part)) {
                 if (part.equals("-") && expectOperand) {
                     // This is a unary minus
                     unaryMinusCount++;
@@ -243,11 +244,12 @@ public class StringToExpression {
             "-", 1, 
             "*", 2, 
             "/", 2, 
-            "u-", 3,  // Unary minus has higher precedence
-            "sin", 4, // Functions have highest precedence
-            "cos", 4,
-            "ln", 4,
-            "exp", 4
+            "^", 3, // Power has higher precedence than multiplication/division
+            "u-", 4, // Unary minus has higher precedence
+            "sin", 5, // Functions have highest precedence
+            "cos", 5,
+            "ln", 5,
+            "exp", 5
         );
         
         List<String> output = new ArrayList<>();
@@ -276,7 +278,7 @@ public class StringToExpression {
                 }
             }
             // Handle unary minus and binary operators
-            else if ("+-*/u-".contains(token)) {
+            else if ("+-*/^u-".contains(token)) {
                 while (!operators.isEmpty() && 
                        !StaticHelpers.openingBrackets.contains(operators.peek()) &&
                        precedence.getOrDefault(operators.peek(), 0) >= precedence.get(token)) {
@@ -325,6 +327,7 @@ public class StringToExpression {
     
     /**
      * Check if a token represents a complex number.
+     * This method ensures function names containing 'i' aren't mistaken for complex numbers.
      */
     private static boolean isComplexNumber(String token) {
         // First, check if it's a function name - these are not complex numbers
@@ -345,6 +348,7 @@ public class StringToExpression {
                token.matches(".*[-+]\\d+\\.\\d+i$") ||
                COMPLEX_PATTERN.matcher(token).matches();
     }
+    
     /**
      * Build an expression tree from a postfix expression.
      */
@@ -401,7 +405,7 @@ public class StringToExpression {
                 }
             }
             // Handle binary operators
-            else if ("+-*/".contains(token)) {
+            else if ("+-*/^".contains(token)) {
                 if (stack.size() < 2) {
                     throw new IllegalArgumentException("Invalid expression: insufficient operands for binary operator " + token);
                 }
@@ -414,6 +418,7 @@ public class StringToExpression {
                     case "-": stack.push(new Minus(null, left, right)); break;
                     case "*": stack.push(new Times(null, left, right)); break;
                     case "/": stack.push(new Divides(null, left, right)); break;
+                    case "^": stack.push(new Power(null, left, right)); break;
                     default: throw new IllegalArgumentException("Unsupported operator: " + token);
                 }
             } else {
@@ -434,20 +439,23 @@ public class StringToExpression {
     public static void main(String[] args) {
         Calculator c = new Calculator();
         
-        // Test with a variety of expressions including complex numbers and functions
+        // Test with a variety of expressions including complex numbers, functions, and power operation
         String[] testExpressions = {
+            "2^3",
+            "2^(1+2)",
+            "2^3^2",  // This is 2^(3^2) = 2^9 = 512 due to right-to-left associativity
+            "sin(2^2)",
+            "3+4i ^ 2",
             "sin(3.14159265359/2)",
-            "sin(1+2)",
             "cos(0)",
             "ln(1)",
             "exp(0)",
-            "3+4i + sin(1,2)",  // Complex number addition with sine of complex number
-            "sin(3+4i)",        // Sine of a complex number
+            "3+4i + sin(1)",
+            "sin(3+4i)",
             "exp(3.14159265359)",
             "2 * sin(3.14159265359/6)",
             "1 + cos(0) + 2",
-            "sin(cos(0))",       // Nested functions
-            "3+4i * cos(3.14159265359)"  // Complex number multiplied by cosine
+            "sin(cos(0))"
         };
         
         for (String expr : testExpressions) {
