@@ -10,6 +10,7 @@ import calculator.Calculator;
 import calculator.Divides;
 import calculator.Expression;
 import calculator.Minus;
+import calculator.Modulo;
 import calculator.MyNumber;
 import calculator.MyComplexNumber;
 import calculator.Plus;
@@ -19,6 +20,7 @@ import calculator.Sin;
 import calculator.Cos;
 import calculator.Ln;
 import calculator.Exp;
+import calculator.Sqrt;
 import calculator.StaticClasses.StaticHelpers;
 
 /**
@@ -32,7 +34,7 @@ public class StringToExpression {
         Pattern.compile("^\\s*(-?\\d*\\.?\\d*)([-+]\\d*\\.?\\d*)?i\\s*$");
         
     // Valid function names (all lowercase)
-    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "ln", "exp");
+    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "ln", "exp", "sqrt");
 
     /**
      * Parse a string representation of an arithmetic expression into an Expression object.
@@ -106,7 +108,7 @@ public class StringToExpression {
         
         // Pre-process: insert spaces around operators and brackets for easier tokenization
         expr = expr.replaceAll("\\s+", " ")  // Normalize whitespace
-                  .replaceAll("([\\+\\-\\*\\/\\^\\(\\)\\[\\]\\{\\}\\,])", " $1 ")  // Add spaces around operators, brackets, and commas
+                  .replaceAll("([\\+\\-\\*\\/\\^\\%\\(\\)\\[\\]\\{\\}\\,])", " $1 ")  // Add spaces around operators, brackets, and commas
                   .replaceAll("\\s+", " ")  // Normalize whitespace again
                   .trim();  // Remove leading/trailing whitespace
         
@@ -177,7 +179,7 @@ public class StringToExpression {
             }
             
             // Check if it's an operator
-            if ("+-*/^".contains(part)) {
+            if ("+-*/^%".contains(part)) {
                 if (part.equals("-") && expectOperand) {
                     // This is a unary minus
                     unaryMinusCount++;
@@ -239,18 +241,21 @@ public class StringToExpression {
      */
     private static List<String> infixToPostfix(List<String> tokens) {
         // Define operator and function precedence
-        Map<String, Integer> precedence = Map.of(
-            "+", 1, 
-            "-", 1, 
-            "*", 2, 
-            "/", 2, 
-            "^", 3, // Power has higher precedence than multiplication/division
-            "u-", 4, // Unary minus has higher precedence
-            "sin", 5, // Functions have highest precedence
-            "cos", 5,
-            "ln", 5,
-            "exp", 5
-        );
+        Map<String, Integer> precedence = Map.ofEntries(
+        Map.entry("+", 1),
+        Map.entry("-", 1),
+        Map.entry("*", 2),
+        Map.entry("/", 2),
+        Map.entry("%", 2),   // Modulo
+        Map.entry("^", 3),   // Power
+        Map.entry("u-", 4),  // Unary minus
+        Map.entry("sin", 5),
+        Map.entry("cos", 5),
+        Map.entry("ln", 5),
+        Map.entry("exp", 5),
+        Map.entry("sqrt", 5)
+    );
+
         
         List<String> output = new ArrayList<>();
         Stack<String> operators = new Stack<>();
@@ -278,7 +283,7 @@ public class StringToExpression {
                 }
             }
             // Handle unary minus and binary operators
-            else if ("+-*/^u-".contains(token)) {
+            else if ("+-*/^%u-".contains(token)) {
                 while (!operators.isEmpty() && 
                        !StaticHelpers.openingBrackets.contains(operators.peek()) &&
                        precedence.getOrDefault(operators.peek(), 0) >= precedence.get(token)) {
@@ -401,11 +406,12 @@ public class StringToExpression {
                     case "cos": stack.push(new Cos(null, operand)); break;
                     case "ln": stack.push(new Ln(null, operand)); break;
                     case "exp": stack.push(new Exp(null, operand)); break;
+                    case "sqrt": stack.push(new Sqrt(null, operand)); break;
                     default: throw new IllegalArgumentException("Unsupported function: " + token);
                 }
             }
             // Handle binary operators
-            else if ("+-*/^".contains(token)) {
+            else if ("+-*/%^".contains(token)) {
                 if (stack.size() < 2) {
                     throw new IllegalArgumentException("Invalid expression: insufficient operands for binary operator " + token);
                 }
@@ -418,6 +424,7 @@ public class StringToExpression {
                     case "-": stack.push(new Minus(null, left, right)); break;
                     case "*": stack.push(new Times(null, left, right)); break;
                     case "/": stack.push(new Divides(null, left, right)); break;
+                    case "%": stack.push(new Modulo(null, left, right)); break;
                     case "^": stack.push(new Power(null, left, right)); break;
                     default: throw new IllegalArgumentException("Unsupported operator: " + token);
                 }
@@ -450,6 +457,10 @@ public class StringToExpression {
             "cos(0)",
             "ln(1)",
             "exp(0)",
+            "sqrt(4)",
+            "sqrt(16)",
+            "5 % 2",  // Tests modulo operation: 5 mod 2 = 1
+            "10 % 3", // Tests modulo operation: 10 mod 3 = 1
             "3+4i + sin(1)",
             "sin(3+4i)",
             "exp(3.14159265359)",
