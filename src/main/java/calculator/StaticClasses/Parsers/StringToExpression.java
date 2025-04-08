@@ -3,12 +3,14 @@ package calculator.StaticClasses.Parsers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
 import calculator.Calculator;
 import calculator.Divides;
 import calculator.Expression;
+import calculator.MathConstant;
 import calculator.Minus;
 import calculator.Modulo;
 import calculator.MyNumber;
@@ -26,7 +28,7 @@ import calculator.StaticClasses.StaticHelpers;
 
 /**
  * Utility class for parsing string expressions into Expression objects.
- * Handles infix expressions with support for decimal numbers, parentheses, complex numbers, and functions.
+ * Handles infix expressions with support for decimal numbers, parentheses, complex numbers, functions and constants.
  */
 public class StringToExpression {
 
@@ -36,6 +38,9 @@ public class StringToExpression {
         
     // Valid function names (all lowercase)
     private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "tan", "ln", "exp", "sqrt");
+    
+    // Valid mathematical constants
+    private static final Set<String> CONSTANTS = Set.of("PI", "E", "PHI", "SQRT2");
 
     /**
      * Parse a string representation of an arithmetic expression into an Expression object.
@@ -94,7 +99,7 @@ public class StringToExpression {
     }
 
     /**
-     * Tokenize a string expression into a list of tokens (numbers, complex numbers, operators, parentheses).
+     * Tokenize a string expression into a list of tokens (constants, numbers, complex numbers, operators, parentheses).
      */
     private static List<String> tokenize(String expr) {
         List<String> tokens = new ArrayList<>();
@@ -125,6 +130,20 @@ public class StringToExpression {
                 }
                 tokens.add(part.toLowerCase());
                 expectOperand = false;  // Function name is followed by opening parenthesis, not an operand
+                continue;
+            }
+            
+            // Check if it's a mathematical constant
+            if (CONSTANTS.contains(part.toUpperCase())) {
+                if (unaryMinusCount > 0 && unaryMinusCount % 2 != 0) {
+                    // Handle odd number of unary minuses before constant
+                    tokens.add("u-");
+                    tokens.add(part.toUpperCase());
+                } else {
+                    tokens.add(part.toUpperCase());
+                }
+                unaryMinusCount = 0;
+                expectOperand = false;
                 continue;
             }
             
@@ -258,15 +277,14 @@ public class StringToExpression {
         Map.entry("sqrt", 5)
     );
 
-        
         List<String> output = new ArrayList<>();
         Stack<String> operators = new Stack<>();
         
         for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i);
             
-            // Numbers and complex numbers go straight to output
-            if (token.matches("-?\\d+(\\.\\d+)?") || isComplexNumber(token)) {
+            // Numbers, complex numbers, and constants go straight to output
+            if (token.matches("-?\\d+(\\.\\d+)?") || isComplexNumber(token) || CONSTANTS.contains(token)) {
                 output.add(token);
             } 
             // Handle function names
@@ -376,6 +394,10 @@ public class StringToExpression {
                     throw new IllegalArgumentException("Invalid complex number format: " + token);
                 }
             }
+            // Handle mathematical constants
+            else if (CONSTANTS.contains(token)) {
+                stack.push(new MathConstant(token));
+            }
             // Handle regular numbers
             else if (token.matches("-?\\d+(\\.\\d+)?")) {
                 // Parse as a double if it contains a decimal point, otherwise as an integer
@@ -406,7 +428,7 @@ public class StringToExpression {
                 switch (token) {
                     case "sin": stack.push(new Sin(null, operand)); break;
                     case "cos": stack.push(new Cos(null, operand)); break;
-                    case "tan": stack.push(new Tan(null, operand)); break; // Added tangent
+                    case "tan": stack.push(new Tan(null, operand)); break;
                     case "ln": stack.push(new Ln(null, operand)); break;
                     case "exp": stack.push(new Exp(null, operand)); break;
                     case "sqrt": stack.push(new Sqrt(null, operand)); break;
@@ -444,34 +466,33 @@ public class StringToExpression {
     }
 
     /**
-     * Test method to validate parsing of various expressions, including complex numbers and functions.
+     * Test method to validate parsing of various expressions, including complex numbers, functions, and constants.
      */
     public static void main(String[] args) {
         Calculator c = new Calculator();
         
-        // Test with a variety of expressions including complex numbers, functions, and power operation
+        // Test with a variety of expressions including complex numbers, functions, and mathematical constants
         String[] testExpressions = {
             "2^3",
-            "2^(1+2)",
-            "2^3^2",  // This is 2^(3^2) = 2^9 = 512 due to right-to-left associativity
-            "sin(2^2)",
-            "3+4i ^ 2",
-            "sin(3.14159265359/2)",
-            "cos(0)",
-            "tan(1)",  // Added tangent test
-            "tan(3.14159265359/4)",  // tan(π/4) = 1
-            "ln(1)",
-            "exp(0)",
-            "sqrt(4)",
-            "sqrt(16)",
-            "5 % 2",  // Tests modulo operation: 5 mod 2 = 1
-            "10 % 3", // Tests modulo operation: 10 mod 3 = 1
-            "3+4i + sin(1)",
-            "sin(3+4i)",
-            "exp(3.14159265359)",
-            "2 * sin(3.14159265359/6)",
-            "1 + cos(0) + 2",
-            "sin(cos(0))"
+            "PI",
+            "E",
+            "PHI",
+            "SQRT2",
+            "sin(PI/2)",
+            "cos(PI)",
+            "PI + E",
+            "2 * PI",
+            "PI * r^2",  // Area of a circle with radius r
+            "sin(PI/6)",  // sin(30°) = 0.5
+            "tan(PI/4)",  // tan(45°) = 1
+            "E^2",
+            "ln(E)",      // ln(e) = 1
+            "sqrt(PI)",
+            "2*PI*r",     // Circumference of a circle with radius r
+            "-PI",        // Negative PI
+            "sin(PI/2) + cos(PI)",  // 1 + (-1) = 0
+            "sqrt(SQRT2 * SQRT2)",  // sqrt(2) = SQRT2
+            "PHI^2 - PHI - 1"  // Golden ratio property: φ² = φ + 1, so φ² - φ - 1 = 0
         };
         
         for (String expr : testExpressions) {

@@ -3,6 +3,7 @@ package visitor;
 import calculator.Expression;
 import calculator.MyNumber;
 import calculator.MyComplexNumber;
+import calculator.MathConstant;
 import calculator.Operation;
 import calculator.Plus;
 import calculator.Minus;
@@ -11,8 +12,10 @@ import calculator.Divides;
 import calculator.Power;
 import calculator.Sin;
 import calculator.Cos;
+import calculator.Tan;
 import calculator.Ln;
 import calculator.Exp;
+import calculator.Sqrt;
 import calculator.UnaryOperation;
 
 import java.util.ArrayList;
@@ -52,6 +55,14 @@ public class Evaluator extends Visitor {
      */
     public void visit(MyComplexNumber n) {
         computedValue = n;
+    }
+    
+    /** Use the visitor design pattern to visit a mathematical constant.
+     *
+     * @param m The mathematical constant being visited
+     */
+    public void visit(MathConstant m) {
+        computedValue = m.getValue();
     }
 
     /** Use the visitor design pattern to visit an operation
