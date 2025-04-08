@@ -18,6 +18,7 @@ import calculator.Times;
 import calculator.Power;
 import calculator.Sin;
 import calculator.Cos;
+import calculator.Tan;
 import calculator.Ln;
 import calculator.Exp;
 import calculator.Sqrt;
@@ -34,7 +35,7 @@ public class StringToExpression {
         Pattern.compile("^\\s*(-?\\d*\\.?\\d*)([-+]\\d*\\.?\\d*)?i\\s*$");
         
     // Valid function names (all lowercase)
-    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "ln", "exp", "sqrt");
+    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "tan", "ln", "exp", "sqrt");
 
     /**
      * Parse a string representation of an arithmetic expression into an Expression object.
@@ -246,11 +247,12 @@ public class StringToExpression {
         Map.entry("-", 1),
         Map.entry("*", 2),
         Map.entry("/", 2),
-        Map.entry("%", 2),   // Modulo
-        Map.entry("^", 3),   // Power
-        Map.entry("u-", 4),  // Unary minus
+        Map.entry("%", 2),    // Modulo
+        Map.entry("^", 3),    // Power
+        Map.entry("u-", 4),   // Unary minus
         Map.entry("sin", 5),
         Map.entry("cos", 5),
+        Map.entry("tan", 5),  // Tangent
         Map.entry("ln", 5),
         Map.entry("exp", 5),
         Map.entry("sqrt", 5)
@@ -404,6 +406,7 @@ public class StringToExpression {
                 switch (token) {
                     case "sin": stack.push(new Sin(null, operand)); break;
                     case "cos": stack.push(new Cos(null, operand)); break;
+                    case "tan": stack.push(new Tan(null, operand)); break; // Added tangent
                     case "ln": stack.push(new Ln(null, operand)); break;
                     case "exp": stack.push(new Exp(null, operand)); break;
                     case "sqrt": stack.push(new Sqrt(null, operand)); break;
@@ -455,6 +458,8 @@ public class StringToExpression {
             "3+4i ^ 2",
             "sin(3.14159265359/2)",
             "cos(0)",
+            "tan(1)",  // Added tangent test
+            "tan(3.14159265359/4)",  // tan(π/4) = 1
             "ln(1)",
             "exp(0)",
             "sqrt(4)",
