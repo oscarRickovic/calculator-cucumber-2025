@@ -175,7 +175,7 @@ public abstract class Operation implements Expression
    * @param n	The notation to be used for representing the operation (prefix, infix or postfix)
    * @return	The String that is the result of the conversion.
    */
-  public final String toString(Notation n) {
+  public String toString(Notation n) {
 	   Stream<String> s = args.stream().map(Object::toString);
 	   return switch (n) {
 		   case INFIX -> "( " +

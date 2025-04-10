@@ -2,6 +2,7 @@ package visitor;
 
 import calculator.MyNumber;
 import calculator.MyComplexNumber;
+import calculator.MathConstant;
 import calculator.Operation;
 
 /**
@@ -22,6 +23,13 @@ public abstract class Visitor {
      * @param n The complex number being visited
      */
     public abstract void visit(MyComplexNumber n);
+    
+    /**
+     * The Visitor can traverse a mathematical constant (a subtype of Expression)
+     *
+     * @param m The mathematical constant being visited
+     */
+    public abstract void visit(MathConstant m);
 
     /**
      * The Visitor can traverse an operation (a subtype of Expression)
