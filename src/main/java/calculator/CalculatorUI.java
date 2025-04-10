@@ -10,6 +10,9 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
+import javafx.scene.paint.Color;
+import javafx.scene.effect.DropShadow;
 import javafx.stage.Stage;
 
 // Importing local packages
@@ -25,21 +28,47 @@ public class CalculatorUI extends Application {
     private Stage primaryStage;
     private HBox mainLayout;
     private ToggleButton scientificToggle;
+    
+    // Constants for UI design
+    private static final String NUMBER_BUTTON_STYLE = "-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-background-radius: 5;";
+    private static final String OPERATION_BUTTON_STYLE = "-fx-background-color: #ff9500; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
+    private static final String SCIENTIFIC_BUTTON_STYLE = "-fx-background-color: #4a4a4a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
+    private static final String TOGGLE_BUTTON_STYLE = "-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
+    private static final String TOGGLE_BUTTON_SELECTED_STYLE = "-fx-background-color: #0056b3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
+    private static final String DISPLAY_STYLE = "-fx-background-color: #f8f8f8; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5;";
+    
+    // Button sizes
+    private static final double BASIC_BUTTON_SIZE = 60;
+    private static final double SCIENTIFIC_BUTTON_SIZE = 70;
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("JavaFX Calculator");
 
+        // Create display with improved styling
         display = new TextField();
         display.setEditable(false);
-        display.setPrefHeight(50);
+        display.setPrefHeight(60);
+        display.setFont(Font.font("Arial", 20));
         display.setAlignment(Pos.CENTER_RIGHT);
+        display.setStyle(DISPLAY_STYLE);
+        
+        // Set initial display width
+        display.setPrefWidth(4 * BASIC_BUTTON_SIZE + 30); // Account for padding
 
-        // Create toggle button for scientific mode
+        // Create toggle button for scientific mode with improved styling
         scientificToggle = new ToggleButton("Scientific Mode");
+        scientificToggle.setStyle(TOGGLE_BUTTON_STYLE);
+        scientificToggle.setPrefWidth(4 * BASIC_BUTTON_SIZE + 30);
+        scientificToggle.setPrefHeight(40);
         scientificToggle.setOnAction(e -> {
             isScientificMode = scientificToggle.isSelected();
+            if (isScientificMode) {
+                scientificToggle.setStyle(TOGGLE_BUTTON_SELECTED_STYLE);
+            } else {
+                scientificToggle.setStyle(TOGGLE_BUTTON_STYLE);
+            }
             updateLayout();
         });
 
@@ -51,18 +80,23 @@ public class CalculatorUI extends Application {
         
         // Create control panel with toggle button
         VBox controlPanel = new VBox(10);
+        controlPanel.setAlignment(Pos.CENTER);
         controlPanel.getChildren().add(scientificToggle);
         
         // Create the basic calculator box
         VBox basicCalculatorBox = new VBox(10);
         basicCalculatorBox.setAlignment(Pos.CENTER);
-        basicCalculatorBox.setPadding(new Insets(10));
+        basicCalculatorBox.setPadding(new Insets(15));
         basicCalculatorBox.getChildren().addAll(display, controlPanel, basicGrid);
         
         // Create the main layout as HBox to place scientific grid on the right
-        mainLayout = new HBox(10);
-        mainLayout.setPadding(new Insets(10));
+        mainLayout = new HBox(15);
+        mainLayout.setPadding(new Insets(15));
+        mainLayout.setAlignment(Pos.CENTER);
         mainLayout.getChildren().add(basicCalculatorBox);
+        
+        // Apply a nice background color to the scene
+        mainLayout.setStyle("-fx-background-color: linear-gradient(to bottom right, #f5f7fa, #c3cfe2);");
         
         // Initial scene setup
         Scene scene = new Scene(mainLayout);
@@ -75,12 +109,24 @@ public class CalculatorUI extends Application {
         if (isScientificMode) {
             if (!mainLayout.getChildren().contains(scientificGrid)) {
                 mainLayout.getChildren().add(scientificGrid);
-                primaryStage.setWidth(550); // Wider window for scientific calculator
+                
+                // Increase the width of the display when in scientific mode
+                display.setPrefWidth((4 * BASIC_BUTTON_SIZE + 30) + (4 * SCIENTIFIC_BUTTON_SIZE + 30));
+                
+                // Update window size for scientific calculator
+                primaryStage.setWidth(4 * BASIC_BUTTON_SIZE + 4 * SCIENTIFIC_BUTTON_SIZE + 90); // Additional space for padding
+                primaryStage.setHeight(6 * BASIC_BUTTON_SIZE + 120); // Adjust height for larger buttons
             }
         } else {
             // If scientific mode is disabled, remove the scientific grid if it's there
             mainLayout.getChildren().remove(scientificGrid);
-            primaryStage.setWidth(300); // Original width for basic calculator
+            
+            // Restore the original width of the display
+            display.setPrefWidth(4 * BASIC_BUTTON_SIZE + 30);
+            
+            // Restore original window size for basic calculator
+            primaryStage.setWidth(4 * BASIC_BUTTON_SIZE + 60);
+            primaryStage.setHeight(6 * BASIC_BUTTON_SIZE + 120);
         }
         
         // Force layout update
@@ -94,28 +140,33 @@ public class CalculatorUI extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        String[] buttons = {
-                "7", "8", "9", "/",
-                "4", "5", "6", "*",
-                "1", "2", "3", "-",
-                "0", ".", "C", "+",
-                "="
+        String[][] buttonData = {
+                {"7", "8", "9", "/", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
+                {"4", "5", "6", "*", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
+                {"1", "2", "3", "-", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
+                {"0", ".", "C", "+", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
+                {"=", "DEL", null, null, OPERATION_BUTTON_STYLE, OPERATION_BUTTON_STYLE, null, null}
         };
 
-        int row = 0, col = 0;
-        for (String label : buttons) {
-            Button button = createButton(label);
-            grid.add(button, col, row);
-            col++;
-            if (col > 3) {
-                col = 0;
-                row++;
+        for (int row = 0; row < buttonData.length; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (buttonData[row][col] != null) {
+                    String label = buttonData[row][col];
+                    String style = buttonData[row][col + 4];
+                    
+                    Button button = createStyledButton(label, style, BASIC_BUTTON_SIZE);
+                    
+                    // Make the equal button wider (span 2 columns)
+                    if (label.equals("=")) {
+                        grid.add(button, col, row, 2, 1);
+                        // Skip the next column since it's covered by the wider button
+                        col++;
+                    } else {
+                        grid.add(button, col, row);
+                    }
+                }
             }
         }
-
-        // Backspace button
-        Button deleteButton = createButton("DEL");
-        grid.add(deleteButton, 3, row);
 
         return grid;
     }
@@ -127,60 +178,59 @@ public class CalculatorUI extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Scientific buttons - first row
-        String[] firstRow = {"sin", "cos", "tan", "π"};
-        for (int i = 0; i < firstRow.length; i++) {
-            Button button = createButton(firstRow[i]);
-            grid.add(button, i, 0);
-        }
+        // Scientific buttons with their styles
+        String[][] buttonData = {
+            {"sin", "cos", "tan", "π", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
+            {"asin", "acos", "atan", "e", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
+            {"log", "ln", "x²", "x³", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
+            {"√x", "∛x", "xʸ", "1/x", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
+            {"(", ")", "!", "%", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE}
+        };
 
-        // Scientific buttons - second row
-        String[] secondRow = {"asin", "acos", "atan", "e"};
-        for (int i = 0; i < secondRow.length; i++) {
-            Button button = createButton(secondRow[i]);
-            grid.add(button, i, 1);
+        for (int row = 0; row < buttonData.length; row++) {
+            for (int col = 0; col < 4; col++) {
+                String label = buttonData[row][col];
+                String style = buttonData[row][col + 4];
+                Button button = createStyledButton(label, style, SCIENTIFIC_BUTTON_SIZE);
+                grid.add(button, col, row);
+            }
         }
-
-        // Scientific buttons - third row
-        String[] thirdRow = {"log", "ln", "x²", "x³"};
-        for (int i = 0; i < thirdRow.length; i++) {
-            Button button = createButton(thirdRow[i]);
-            grid.add(button, i, 2);
-        }
-
-        // Scientific buttons - fourth row
-        String[] fourthRow = {"√x", "∛x", "xʸ", "1/x"};
-        for (int i = 0; i < fourthRow.length; i++) {
-            Button button = createButton(fourthRow[i]);
-            grid.add(button, i, 3);
-        }
-
-        // Scientific buttons - fifth row
-        String[] fifthRow = {"(", ")", "!", "%"};
-        for (int i = 0; i < fifthRow.length; i++) {
-            Button button = createButton(fifthRow[i]);
-            grid.add(button, i, 4);
-        }
-
-        // Memory buttons row
-        HBox memoryBox = new HBox(5);
-        String[] memoryButtons = {"MC", "MR", "M+", "M-"};
-        for (String label : memoryButtons) {
-            Button button = createButton(label);
-            memoryBox.getChildren().add(button);
-        }
-        grid.add(memoryBox, 0, 5, 4, 1);
-
-        // Angle unit toggle button
-        Button angleButton = createButton("DEG");
-        grid.add(angleButton, 0, 6);
 
         return grid;
     }
 
-    private Button createButton(String label) {
+    private Button createStyledButton(String label, String style, double size) {
         Button button = new Button(label);
-        button.setPrefSize(50, 50);
+        button.setPrefSize(size, size);
+        button.setFont(Font.font("Arial", 14));
+        button.setStyle(style);
+        
+        // Add drop shadow effect for 3D look
+        DropShadow shadow = new DropShadow();
+        shadow.setRadius(3.0);
+        shadow.setOffsetX(1.0);
+        shadow.setOffsetY(1.0);
+        shadow.setColor(Color.color(0.4, 0.4, 0.4, 0.3));
+        button.setEffect(shadow);
+        
+        // Add hover effect
+        button.setOnMouseEntered(e -> {
+            button.setStyle(style + "-fx-scale-x: 1.05; -fx-scale-y: 1.05;");
+        });
+        
+        button.setOnMouseExited(e -> {
+            button.setStyle(style);
+        });
+        
+        // Add click effect
+        button.setOnMousePressed(e -> {
+            button.setStyle(style + "-fx-scale-x: 0.95; -fx-scale-y: 0.95;");
+        });
+        
+        button.setOnMouseReleased(e -> {
+            button.setStyle(style);
+        });
+        
         button.setOnAction(e -> handleButtonClick(label));
         return button;
     }
@@ -205,35 +255,35 @@ public class CalculatorUI extends Application {
                 if (currentInput.length() > 0) {
                     String currentValue = currentInput.toString();
                     display.setText(currentValue + "²");
-                    // Le calcul se fera lors de l'appui sur "="
+                    // Calculation will be done when pressing "="
                 }
                 break;
             case "x³":
                 if (currentInput.length() > 0) {
                     String currentValue = currentInput.toString();
                     display.setText(currentValue + "³");
-                    // Le calcul se fera lors de l'appui sur "="
+                    // Calculation will be done when pressing "="
                 }
                 break;
             case "√x":
                 if (currentInput.length() > 0) {
                     String currentValue = currentInput.toString();
                     display.setText("√" + currentValue);
-                    // Le calcul se fera lors de l'appui sur "="
+                    // Calculation will be done when pressing "="
                 }
                 break;
             case "∛x":
                 if (currentInput.length() > 0) {
                     String currentValue = currentInput.toString();
                     display.setText("∛" + currentValue);
-                    // Le calcul se fera lors de l'appui sur "="
+                    // Calculation will be done when pressing "="
                 }
                 break;
             case "1/x":
                 if (currentInput.length() > 0) {
                     String currentValue = currentInput.toString();
                     display.setText("1/" + currentValue);
-                    // Le calcul se fera lors de l'appui sur "="
+                    // Calculation will be done when pressing "="
                 }
                 break;
             case "sin":
@@ -247,7 +297,7 @@ public class CalculatorUI extends Application {
                 if (currentInput.length() > 0) {
                     String currentValue = currentInput.toString();
                     display.setText(label + "(" + currentValue + ")");
-                    // Le calcul se fera lors de l'appui sur "="
+                    // Calculation will be done when pressing "="
                 } else {
                     display.setText(label + "()");
                 }
@@ -272,11 +322,11 @@ public class CalculatorUI extends Application {
                     String currentValue = currentInput.toString();
                     display.setText(currentValue + "^");
                     
-                    // Très important: on vide la saisie courante pour que 
-                    // l'utilisateur puisse saisir l'exposant
+                    // Very important: clear the current input so that 
+                    // the user can enter the exponent
                     currentInput.setLength(0);
                     
-                    // On stocke la base et l'opération pour reconstruire l'expression complète
+                    // Store the base and operation to rebuild the complete expression
                     currentInput.append(currentValue).append("^");
                 }
                 break;
@@ -285,11 +335,11 @@ public class CalculatorUI extends Application {
             case "M+":  // Memory Add
             case "M-":  // Memory Subtract
             case "DEG": // Degree mode toggle
-                // Afficher que ces fonctions sont en cours d'implémentation
+                // Display that these functions are work in progress
                 display.setText(label + " (WIP)");
                 break;
             default:
-                // Pour les autres boutons scientifiques qui ne sont pas encore gérés
+                // For other scientific buttons that are not yet handled
                 if (isScientificButton(label)) {
                     if (currentInput.length() > 0) {
                         String currentValue = currentInput.toString();
@@ -298,7 +348,7 @@ public class CalculatorUI extends Application {
                         display.setText(label);
                     }
                 } else {
-                    // Comportement normal pour les boutons de la calculatrice de base
+                    // Normal behavior for basic calculator buttons
                     currentInput.append(label);
                     display.setText(currentInput.toString());
                 }
@@ -329,8 +379,8 @@ public class CalculatorUI extends Application {
 
     private void evaluateExpression() {
         try {
-            // Note: Cette méthode devrait être étendue pour gérer les notations scientifiques
-            // comme "9²", "√9", etc. Pour l'instant, elle utilise seulement le parseur existant
+            // Note: This method should be extended to handle scientific notations
+            // like "9²", "√9", etc. For now, it only uses the existing parser
             String result = c.eval(StringToExpression.parseStringTExpression(currentInput.toString())).toString();
             display.setText(result);
             currentInput.setLength(0);
