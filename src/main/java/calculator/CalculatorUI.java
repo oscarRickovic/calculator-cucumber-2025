@@ -1,132 +1,222 @@
 package calculator;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Font;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.effect.DropShadow;
 import javafx.stage.Stage;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
 
 // Importing local packages
 import calculator.StaticClasses.Parsers.StringToExpression;
 import calculator.Calculator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CalculatorUI extends Application {
     private TextField display;
+    private Label expressionHistory;
     private StringBuilder currentInput = new StringBuilder();
-    private Calculator c = new Calculator();
+    private Calculator calculator = new Calculator();
     private boolean isScientificMode = false;
+    private SimpleBooleanProperty isDarkMode = new SimpleBooleanProperty(false);
     private GridPane scientificGrid;
     private Stage primaryStage;
-    private HBox mainLayout;
+    private BorderPane mainLayout;
     private ToggleButton scientificToggle;
+    private ToggleButton themeToggle;
+    private List<String> calculationHistory = new ArrayList<>();
+    private int historyIndex = -1;
     
-    // Constants for UI design
-    private static final String NUMBER_BUTTON_STYLE = "-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-background-radius: 5;";
-    private static final String OPERATION_BUTTON_STYLE = "-fx-background-color: #ff9500; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
-    private static final String SCIENTIFIC_BUTTON_STYLE = "-fx-background-color: #4a4a4a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
-    private static final String TOGGLE_BUTTON_STYLE = "-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
-    private static final String TOGGLE_BUTTON_SELECTED_STYLE = "-fx-background-color: #0056b3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;";
-    private static final String DISPLAY_STYLE = "-fx-background-color: #f8f8f8; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5;";
+    // Memory functionality
+    private double memoryValue = 0.0;
+    private boolean hasMemory = false;
+    
+    // Constants for UI design - Light Mode
+    private static final String LIGHT_BG = "linear-gradient(to bottom right, #ffffff, #f5f5f5)";
+    private static final String LIGHT_NUMBER_STYLE = "-fx-background-color: #f8f8f8; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String LIGHT_OPERATION_STYLE = "-fx-background-color: #ff9500; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String LIGHT_SCIENTIFIC_STYLE = "-fx-background-color: #e6e6e6; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String LIGHT_MEMORY_STYLE = "-fx-background-color: #4285f4; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String LIGHT_TOGGLE_STYLE = "-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15;";
+    private static final String LIGHT_TOGGLE_SELECTED_STYLE = "-fx-background-color: #0056b3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15;";
+    private static final String LIGHT_DISPLAY_STYLE = "-fx-background-color: #ffffff; -fx-text-fill: #333333; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8;";
+    private static final String LIGHT_HISTORY_STYLE = "-fx-text-fill: #888888; -fx-font-style: italic;";
+    
+    // Constants for UI design - Dark Mode
+    private static final String DARK_BG = "linear-gradient(to bottom right, #1e1e1e, #2d2d2d)";
+    private static final String DARK_NUMBER_STYLE = "-fx-background-color: #3a3a3a; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String DARK_OPERATION_STYLE = "-fx-background-color: #ff9500; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String DARK_SCIENTIFIC_STYLE = "-fx-background-color: #2c2c2c; -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String DARK_MEMORY_STYLE = "-fx-background-color: #4285f4; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String DARK_TOGGLE_STYLE = "-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15;";
+    private static final String DARK_TOGGLE_SELECTED_STYLE = "-fx-background-color: #0056b3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15;";
+    private static final String DARK_DISPLAY_STYLE = "-fx-background-color: #2a2a2a; -fx-text-fill: #ffffff; -fx-border-color: #444444; -fx-border-width: 1; -fx-border-radius: 8;";
+    private static final String DARK_HISTORY_STYLE = "-fx-text-fill: #aaaaaa; -fx-font-style: italic;";
     
     // Button sizes
-    private static final double BASIC_BUTTON_SIZE = 60;
-    private static final double SCIENTIFIC_BUTTON_SIZE = 70;
+    private static final double BUTTON_SIZE = 65;
+    private static final double BUTTON_SPACING = 8;
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("JavaFX Calculator");
+        primaryStage.setTitle("Modern Calculator");
 
         // Create display with improved styling
         display = new TextField();
         display.setEditable(false);
-        display.setPrefHeight(60);
-        display.setFont(Font.font("Arial", 20));
+        display.setPrefHeight(70);
+        display.setFont(Font.font("Roboto", FontWeight.BOLD, 24));
         display.setAlignment(Pos.CENTER_RIGHT);
-        display.setStyle(DISPLAY_STYLE);
+        applyStyle(display, LIGHT_DISPLAY_STYLE, DARK_DISPLAY_STYLE);
+        
+        // Create expression history label
+        expressionHistory = new Label();
+        expressionHistory.setFont(Font.font("Roboto", FontWeight.NORMAL, 14));
+        expressionHistory.setAlignment(Pos.CENTER_RIGHT);
+        expressionHistory.setMaxWidth(Double.MAX_VALUE);
+        applyStyle(expressionHistory, LIGHT_HISTORY_STYLE, DARK_HISTORY_STYLE);
         
         // Set initial display width
-        display.setPrefWidth(4 * BASIC_BUTTON_SIZE + 30); // Account for padding
+        display.setPrefWidth(4 * BUTTON_SIZE + 5 * BUTTON_SPACING);
 
-        // Create toggle button for scientific mode with improved styling
-        scientificToggle = new ToggleButton("Scientific Mode");
-        scientificToggle.setStyle(TOGGLE_BUTTON_STYLE);
-        scientificToggle.setPrefWidth(4 * BASIC_BUTTON_SIZE + 30);
+        // Create toggle buttons container
+        HBox toggleContainer = new HBox(10);
+        toggleContainer.setAlignment(Pos.CENTER);
+        
+        // Create toggle button for scientific mode
+        scientificToggle = new ToggleButton("Scientific");
+        applyStyle(scientificToggle, LIGHT_TOGGLE_STYLE, DARK_TOGGLE_STYLE);
         scientificToggle.setPrefHeight(40);
         scientificToggle.setOnAction(e -> {
             isScientificMode = scientificToggle.isSelected();
-            if (isScientificMode) {
-                scientificToggle.setStyle(TOGGLE_BUTTON_SELECTED_STYLE);
-            } else {
-                scientificToggle.setStyle(TOGGLE_BUTTON_STYLE);
-            }
+            updateToggleStyle(scientificToggle, isScientificMode);
             updateLayout();
         });
-
+        
+        // Create toggle button for theme
+        themeToggle = new ToggleButton("Dark Mode");
+        applyStyle(themeToggle, LIGHT_TOGGLE_STYLE, DARK_TOGGLE_STYLE);
+        themeToggle.setPrefHeight(40);
+        themeToggle.setOnAction(e -> {
+            isDarkMode.set(themeToggle.isSelected());
+            updateToggleStyle(themeToggle, isDarkMode.get());
+            updateTheme();
+        });
+        
+        toggleContainer.getChildren().addAll(scientificToggle, themeToggle);
+        
+        // Create a VBox for display and history
+        VBox displayContainer = new VBox(5);
+        displayContainer.getChildren().addAll(expressionHistory, display);
+        
         // Create basic button grid
         GridPane basicGrid = createBasicButtonGrid();
+        
+        // Create memory button grid
+        GridPane memoryGrid = createMemoryButtonGrid();
         
         // Create scientific button grid
         scientificGrid = createScientificButtonGrid();
         
-        // Create control panel with toggle button
-        VBox controlPanel = new VBox(10);
-        controlPanel.setAlignment(Pos.CENTER);
-        controlPanel.getChildren().add(scientificToggle);
+        // Create the top panel with display and toggle buttons
+        VBox topPanel = new VBox(10);
+        topPanel.setPadding(new Insets(15));
+        topPanel.getChildren().addAll(displayContainer, toggleContainer);
         
-        // Create the basic calculator box
-        VBox basicCalculatorBox = new VBox(10);
-        basicCalculatorBox.setAlignment(Pos.CENTER);
-        basicCalculatorBox.setPadding(new Insets(15));
-        basicCalculatorBox.getChildren().addAll(display, controlPanel, basicGrid);
+        // Create the button container
+        VBox buttonContainer = new VBox(10);
+        buttonContainer.setPadding(new Insets(0, 15, 15, 15));
+        buttonContainer.getChildren().addAll(memoryGrid, basicGrid);
         
-        // Create the main layout as HBox to place scientific grid on the right
-        mainLayout = new HBox(15);
-        mainLayout.setPadding(new Insets(15));
-        mainLayout.setAlignment(Pos.CENTER);
-        mainLayout.getChildren().add(basicCalculatorBox);
+        // Create the main layout
+        mainLayout = new BorderPane();
+        mainLayout.setTop(topPanel);
+        mainLayout.setCenter(buttonContainer);
+        applyBackgroundStyle(mainLayout, LIGHT_BG, DARK_BG);
         
-        // Apply a nice background color to the scene
-        mainLayout.setStyle("-fx-background-color: linear-gradient(to bottom right, #f5f7fa, #c3cfe2);");
+        // Add keyboard support
+        Scene scene = new Scene(mainLayout);
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
         
         // Initial scene setup
-        Scene scene = new Scene(mainLayout);
         primaryStage.setScene(scene);
+        primaryStage.setMinWidth(4 * BUTTON_SIZE + 60);
+        primaryStage.setMinHeight(6 * BUTTON_SIZE + 180);
         primaryStage.show();
+        
+        // Set focus to the scene, not the text field
+        scene.getRoot().requestFocus();
+    }
+    
+    private void applyStyle(Control control, String lightStyle, String darkStyle) {
+        control.styleProperty().bind(
+            isDarkMode.asString().map(isDark -> 
+                Boolean.parseBoolean(isDark) ? darkStyle : lightStyle
+            )
+        );
+    }
+    
+    private void applyBackgroundStyle(Region region, String lightStyle, String darkStyle) {
+        region.styleProperty().bind(
+            isDarkMode.asString().map(isDark -> 
+                Boolean.parseBoolean(isDark) ? 
+                "-fx-background-color: " + darkStyle + ";" : 
+                "-fx-background-color: " + lightStyle + ";"
+            )
+        );
+    }
+    
+    private void updateTheme() {
+        // Theme is updated automatically through binding
+        updateToggleStyle(scientificToggle, scientificToggle.isSelected());
+    }
+    
+    private void updateToggleStyle(ToggleButton button, boolean isSelected) {
+        if (isSelected) {
+            applyStyle(button, LIGHT_TOGGLE_SELECTED_STYLE, DARK_TOGGLE_SELECTED_STYLE);
+        } else {
+            applyStyle(button, LIGHT_TOGGLE_STYLE, DARK_TOGGLE_STYLE);
+        }
     }
 
     private void updateLayout() {
+        VBox buttonContainer = (VBox) mainLayout.getCenter();
+        
         // If scientific mode is enabled, add the scientific grid if it's not already there
         if (isScientificMode) {
-            if (!mainLayout.getChildren().contains(scientificGrid)) {
-                mainLayout.getChildren().add(scientificGrid);
+            if (!buttonContainer.getChildren().contains(scientificGrid)) {
+                buttonContainer.getChildren().add(scientificGrid);
                 
                 // Increase the width of the display when in scientific mode
-                display.setPrefWidth((4 * BASIC_BUTTON_SIZE + 30) + (4 * SCIENTIFIC_BUTTON_SIZE + 30));
+                display.setPrefWidth((8 * BUTTON_SIZE + 9 * BUTTON_SPACING));
                 
                 // Update window size for scientific calculator
-                primaryStage.setWidth(4 * BASIC_BUTTON_SIZE + 4 * SCIENTIFIC_BUTTON_SIZE + 90); // Additional space for padding
-                primaryStage.setHeight(6 * BASIC_BUTTON_SIZE + 120); // Adjust height for larger buttons
+                primaryStage.setWidth(8 * BUTTON_SIZE + 9 * BUTTON_SPACING + 50);
+                primaryStage.setHeight(10 * BUTTON_SIZE + 220);
             }
         } else {
             // If scientific mode is disabled, remove the scientific grid if it's there
-            mainLayout.getChildren().remove(scientificGrid);
+            buttonContainer.getChildren().remove(scientificGrid);
             
             // Restore the original width of the display
-            display.setPrefWidth(4 * BASIC_BUTTON_SIZE + 30);
+            display.setPrefWidth(4 * BUTTON_SIZE + 5 * BUTTON_SPACING);
             
             // Restore original window size for basic calculator
-            primaryStage.setWidth(4 * BASIC_BUTTON_SIZE + 60);
-            primaryStage.setHeight(6 * BASIC_BUTTON_SIZE + 120);
+            primaryStage.setWidth(4 * BUTTON_SIZE + 5 * BUTTON_SPACING + 50);
+            primaryStage.setHeight(8 * BUTTON_SIZE + 200);
         }
         
         // Force layout update
@@ -136,62 +226,100 @@ public class CalculatorUI extends Application {
     private GridPane createBasicButtonGrid() {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
-        grid.setPadding(new Insets(10));
-        grid.setHgap(10);
-        grid.setVgap(10);
+        grid.setHgap(BUTTON_SPACING);
+        grid.setVgap(BUTTON_SPACING);
 
         String[][] buttonData = {
-                {"7", "8", "9", "/", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
-                {"4", "5", "6", "*", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
-                {"1", "2", "3", "-", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
-                {"0", ".", "C", "+", NUMBER_BUTTON_STYLE, NUMBER_BUTTON_STYLE, OPERATION_BUTTON_STYLE, OPERATION_BUTTON_STYLE},
-                {"=", "DEL", null, null, OPERATION_BUTTON_STYLE, OPERATION_BUTTON_STYLE, null, null}
+            {"7", "8", "9", "÷", LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_OPERATION_STYLE, 
+                DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_OPERATION_STYLE},
+            {"4", "5", "6", "×", LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_OPERATION_STYLE,
+                DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_OPERATION_STYLE},
+            {"1", "2", "3", "-", LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_OPERATION_STYLE,
+                DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_OPERATION_STYLE},
+            {"0", ".", "C", "+", LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_OPERATION_STYLE, LIGHT_OPERATION_STYLE,
+                DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_OPERATION_STYLE, DARK_OPERATION_STYLE},
+            {"=", "⌫", "(", ")", LIGHT_OPERATION_STYLE, LIGHT_OPERATION_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
+                DARK_OPERATION_STYLE, DARK_OPERATION_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE}
         };
 
         for (int row = 0; row < buttonData.length; row++) {
             for (int col = 0; col < 4; col++) {
-                if (buttonData[row][col] != null) {
-                    String label = buttonData[row][col];
-                    String style = buttonData[row][col + 4];
-                    
-                    Button button = createStyledButton(label, style, BASIC_BUTTON_SIZE);
-                    
-                    // Make the equal button wider (span 2 columns)
-                    if (label.equals("=")) {
-                        grid.add(button, col, row, 2, 1);
-                        // Skip the next column since it's covered by the wider button
-                        col++;
-                    } else {
-                        grid.add(button, col, row);
-                    }
+                String label = buttonData[row][col];
+                String lightStyle = buttonData[row][col + 4];
+                String darkStyle = buttonData[row][col + 8];
+                
+                Button button = createStyledButton(label, lightStyle, darkStyle);
+                grid.add(button, col, row);
+                
+                // Make equal button larger in future iterations if needed
+                if (label.equals("=")) {
+                    // We could span multiple columns here if desired
                 }
             }
         }
 
         return grid;
     }
+    
+    private GridPane createMemoryButtonGrid() {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(BUTTON_SPACING);
+        grid.setVgap(BUTTON_SPACING);
+        
+        // Memory buttons with their styles
+        String[][] buttonData = {
+            {"MC", "MR", "M+", "M-", 
+             LIGHT_MEMORY_STYLE, LIGHT_MEMORY_STYLE, LIGHT_MEMORY_STYLE, LIGHT_MEMORY_STYLE,
+             DARK_MEMORY_STYLE, DARK_MEMORY_STYLE, DARK_MEMORY_STYLE, DARK_MEMORY_STYLE}
+        };
+        
+        for (int row = 0; row < buttonData.length; row++) {
+            for (int col = 0; col < 4; col++) {
+                String label = buttonData[row][col];
+                String lightStyle = buttonData[row][col + 4];
+                String darkStyle = buttonData[row][col + 8];
+                
+                Button button = createStyledButton(label, lightStyle, darkStyle);
+                grid.add(button, col, row);
+            }
+        }
+        
+        return grid;
+    }
 
     private GridPane createScientificButtonGrid() {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
-        grid.setPadding(new Insets(10));
-        grid.setHgap(10);
-        grid.setVgap(10);
+        grid.setHgap(BUTTON_SPACING);
+        grid.setVgap(BUTTON_SPACING);
 
         // Scientific buttons with their styles
         String[][] buttonData = {
-            {"sin", "cos", "tan", "π", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
-            {"asin", "acos", "atan", "e", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
-            {"log", "ln", "x²", "x³", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
-            {"√x", "∛x", "xʸ", "1/x", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE},
-            {"(", ")", "!", "%", SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE, SCIENTIFIC_BUTTON_STYLE}
+            {"sin", "cos", "tan", "ln", 
+             LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
+             DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
+            {"asin", "acos", "atan", "log", 
+             LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
+             DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
+            {"π", "e", "i", "φ", 
+             LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
+             DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
+            {"x²", "x³", "√x", "∛x", 
+             LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
+             DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
+            {"xʸ", "1/x", "%", "!",
+             LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
+             DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE}
         };
 
         for (int row = 0; row < buttonData.length; row++) {
             for (int col = 0; col < 4; col++) {
                 String label = buttonData[row][col];
-                String style = buttonData[row][col + 4];
-                Button button = createStyledButton(label, style, SCIENTIFIC_BUTTON_SIZE);
+                String lightStyle = buttonData[row][col + 4];
+                String darkStyle = buttonData[row][col + 8];
+                
+                Button button = createStyledButton(label, lightStyle, darkStyle);
                 grid.add(button, col, row);
             }
         }
@@ -199,36 +327,33 @@ public class CalculatorUI extends Application {
         return grid;
     }
 
-    private Button createStyledButton(String label, String style, double size) {
+    private Button createStyledButton(String label, String lightStyle, String darkStyle) {
         Button button = new Button(label);
-        button.setPrefSize(size, size);
-        button.setFont(Font.font("Arial", 14));
-        button.setStyle(style);
+        button.setPrefSize(BUTTON_SIZE, BUTTON_SIZE);
+        button.setFont(Font.font("Roboto", FontWeight.BOLD, 14));
+        applyStyle(button, lightStyle, darkStyle);
         
         // Add drop shadow effect for 3D look
         DropShadow shadow = new DropShadow();
-        shadow.setRadius(3.0);
+        shadow.setRadius(4.0);
         shadow.setOffsetX(1.0);
         shadow.setOffsetY(1.0);
         shadow.setColor(Color.color(0.4, 0.4, 0.4, 0.3));
         button.setEffect(shadow);
         
-        // Add hover effect
-        button.setOnMouseEntered(e -> {
-            button.setStyle(style + "-fx-scale-x: 1.05; -fx-scale-y: 1.05;");
-        });
-        
-        button.setOnMouseExited(e -> {
-            button.setStyle(style);
-        });
-        
-        // Add click effect
+        // Add click animation
         button.setOnMousePressed(e -> {
-            button.setStyle(style + "-fx-scale-x: 0.95; -fx-scale-y: 0.95;");
+            ScaleTransition st = new ScaleTransition(Duration.millis(100), button);
+            st.setToX(0.95);
+            st.setToY(0.95);
+            st.play();
         });
         
         button.setOnMouseReleased(e -> {
-            button.setStyle(style);
+            ScaleTransition st = new ScaleTransition(Duration.millis(100), button);
+            st.setToX(1.0);
+            st.setToY(1.0);
+            st.play();
         });
         
         button.setOnAction(e -> handleButtonClick(label));
@@ -236,11 +361,9 @@ public class CalculatorUI extends Application {
     }
 
     private void handleButtonClick(String label) {
-        // Use existing functionality for basic buttons
         switch (label) {
             case "C":
-                currentInput.setLength(0);
-                display.setText("");
+                clearDisplay();
                 break;
             case "=":
                 evaluateExpression();
@@ -248,44 +371,57 @@ public class CalculatorUI extends Application {
             case ".":
                 addDecimalPoint();
                 break;
-            case "DEL":
+            case "⌫": // Backspace
                 handleDelete();
                 break;
-            case "x²":
-                if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText(currentValue + "²");
-                    // Calculation will be done when pressing "="
+            case "÷":
+                appendOperator("/");
+                break;
+            case "×":
+                appendOperator("*");
+                break;
+            case "+":
+            case "-":
+                appendOperator(label);
+                break;
+            case "(":
+            case ")":
+                currentInput.append(label);
+                updateDisplay();
+                break;
+            // Memory operations
+            case "MC":
+                memoryValue = 0.0;
+                hasMemory = false;
+                updateDisplay();
+                break;
+            case "MR":
+                if (hasMemory) {
+                    currentInput.append(String.valueOf(memoryValue));
+                    updateDisplay();
                 }
                 break;
-            case "x³":
+            case "M+":
                 if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText(currentValue + "³");
-                    // Calculation will be done when pressing "="
+                    try {
+                        memoryValue += Double.parseDouble(evaluateCurrentInput());
+                        hasMemory = true;
+                    } catch (Exception ex) {
+                        display.setText("Error");
+                    }
                 }
                 break;
-            case "√x":
+            case "M-":
                 if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText("√" + currentValue);
-                    // Calculation will be done when pressing "="
+                    try {
+                        memoryValue -= Double.parseDouble(evaluateCurrentInput());
+                        hasMemory = true;
+                    } catch (Exception ex) {
+                        display.setText("Error");
+                    }
                 }
                 break;
-            case "∛x":
-                if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText("∛" + currentValue);
-                    // Calculation will be done when pressing "="
-                }
-                break;
-            case "1/x":
-                if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText("1/" + currentValue);
-                    // Calculation will be done when pressing "="
-                }
-                break;
+            // Scientific operations
             case "sin":
             case "cos":
             case "tan":
@@ -294,78 +430,175 @@ public class CalculatorUI extends Application {
             case "atan":
             case "log":
             case "ln":
-                if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText(label + "(" + currentValue + ")");
-                    // Calculation will be done when pressing "="
-                } else {
-                    display.setText(label + "()");
-                }
+                applyFunction(label);
                 break;
             case "π":
-                currentInput.append("π");
-                display.setText(currentInput.toString());
+                currentInput.append("PI");
+                updateDisplay();
                 break;
             case "e":
-                currentInput.append("e");
-                display.setText(currentInput.toString());
+                currentInput.append("E");
+                updateDisplay();
                 break;
-            case "(":
-            case ")":
-            case "!":
-            case "%":
-                currentInput.append(label);
-                display.setText(currentInput.toString());
+            case "i":
+                currentInput.append("i");
+                updateDisplay();
+                break;
+            case "φ":
+                currentInput.append("PHI");
+                updateDisplay();
+                break;
+            case "x²":
+                applyPower(2);
+                break;
+            case "x³":
+                applyPower(3);
+                break;
+            case "√x":
+                applyFunction("sqrt");
+                break;
+            case "∛x":
+                if (currentInput.length() > 0) {
+                    String expr = currentInput.toString();
+                    expr = "("+expr+")^(1.0/3)";
+                    currentInput.setLength(0);
+                    currentInput.append(expr);
+                    updateDisplay();
+                }
                 break;
             case "xʸ":
                 if (currentInput.length() > 0) {
-                    String currentValue = currentInput.toString();
-                    display.setText(currentValue + "^");
-                    
-                    // Very important: clear the current input so that 
-                    // the user can enter the exponent
-                    currentInput.setLength(0);
-                    
-                    // Store the base and operation to rebuild the complete expression
-                    currentInput.append(currentValue).append("^");
+                    currentInput.append("^");
+                    updateDisplay();
                 }
                 break;
-            case "MC":  // Memory Clear
-            case "MR":  // Memory Recall
-            case "M+":  // Memory Add
-            case "M-":  // Memory Subtract
-            case "DEG": // Degree mode toggle
-                // Display that these functions are work in progress
-                display.setText(label + " (WIP)");
+            case "1/x":
+                if (currentInput.length() > 0) {
+                    String expr = currentInput.toString();
+                    currentInput.setLength(0);
+                    currentInput.append("(1.0/").append(expr).append(")");
+                    updateDisplay();
+                }
+                break;
+            case "%":
+                appendOperator("%");
+                break;
+            case "!":
+                if (currentInput.length() > 0) {
+                    currentInput.append("!");
+                    updateDisplay();
+                }
                 break;
             default:
-                // For other scientific buttons that are not yet handled
-                if (isScientificButton(label)) {
-                    if (currentInput.length() > 0) {
-                        String currentValue = currentInput.toString();
-                        display.setText(label + "(" + currentValue + ")");
-                    } else {
-                        display.setText(label);
-                    }
-                } else {
-                    // Normal behavior for basic calculator buttons
-                    currentInput.append(label);
-                    display.setText(currentInput.toString());
-                }
+                // Handle numbers and other input
+                currentInput.append(label);
+                updateDisplay();
         }
     }
-
-    private boolean isScientificButton(String label) {
-        String[] scientificLabels = {"sin", "cos", "tan", "asin", "acos", "atan", 
-                                     "log", "ln", "x²", "x³", "xʸ", "√x", "∛x", "1/x", 
-                                     "π", "e", "(", ")", "!", "%", "MC", "MR", "M+", "M-", "DEG", "RAD", "GRAD"};
+    
+    private void handleKeyPress(KeyEvent event) {
+        KeyCode code = event.getCode();
         
-        for (String sciLabel : scientificLabels) {
-            if (sciLabel.equals(label)) {
-                return true;
-            }
+        // Prevent the TextField from getting focus when typing
+        if (event.getTarget() instanceof TextField) {
+            event.consume();
         }
-        return false;
+        
+        if (code.isDigitKey()) {
+            handleButtonClick(code.getName());
+            event.consume();
+        } else if (code == KeyCode.PERIOD || code == KeyCode.DECIMAL) {
+            handleButtonClick(".");
+            event.consume();
+        } else if (code == KeyCode.EQUALS || code == KeyCode.ENTER) {
+            handleButtonClick("=");
+            event.consume();
+        } else if (code == KeyCode.PLUS || code == KeyCode.ADD) {
+            handleButtonClick("+");
+            event.consume();
+        } else if (code == KeyCode.MINUS || code == KeyCode.SUBTRACT) {
+            handleButtonClick("-");
+            event.consume();
+        } else if (code == KeyCode.ASTERISK || code == KeyCode.MULTIPLY) {
+            handleButtonClick("×");
+            event.consume();
+        } else if (code == KeyCode.SLASH || code == KeyCode.DIVIDE) {
+            handleButtonClick("÷");
+            event.consume();
+        } else if (code == KeyCode.BACK_SPACE) {
+            handleButtonClick("⌫");
+            event.consume();
+        } else if (code == KeyCode.ESCAPE) {
+            handleButtonClick("C");
+            event.consume();
+        } else if (code == KeyCode.OPEN_BRACKET || code == KeyCode.LEFT_PARENTHESIS) {
+            handleButtonClick("(");
+            event.consume();
+        } else if (code == KeyCode.CLOSE_BRACKET || code == KeyCode.RIGHT_PARENTHESIS) {
+            handleButtonClick(")");
+            event.consume();
+        } else if (code == KeyCode.UP) {
+            navigateHistory(-1);
+            event.consume();
+        } else if (code == KeyCode.DOWN) {
+            navigateHistory(1);
+            event.consume();
+        }
+    }
+    
+    private void navigateHistory(int direction) {
+        if (calculationHistory.isEmpty()) return;
+        
+        historyIndex += direction;
+        
+        if (historyIndex < 0) historyIndex = 0;
+        if (historyIndex >= calculationHistory.size()) historyIndex = calculationHistory.size() - 1;
+        
+        currentInput.setLength(0);
+        currentInput.append(calculationHistory.get(historyIndex));
+        updateDisplay();
+    }
+    
+    private void applyFunction(String function) {
+        if (currentInput.length() > 0) {
+            // Apply function to the current expression
+            String expr = currentInput.toString();
+            currentInput.setLength(0);
+            currentInput.append(function).append("(").append(expr).append(")");
+        } else {
+            // If no input, just add the function name with open parenthesis
+            currentInput.append(function).append("(");
+        }
+        updateDisplay();
+    }
+    
+    private void applyPower(int power) {
+        if (currentInput.length() > 0) {
+            String expr = currentInput.toString();
+            currentInput.setLength(0);
+            currentInput.append("(").append(expr).append(")^").append(power);
+            updateDisplay();
+        }
+    }
+    
+    private void appendOperator(String operator) {
+        if (currentInput.length() > 0) {
+            char lastChar = currentInput.charAt(currentInput.length() - 1);
+            
+            // Don't append operator if last character is already an operator
+            if ("+-*/^%".indexOf(lastChar) >= 0) {
+                // Replace the last operator with the new one
+                currentInput.deleteCharAt(currentInput.length() - 1);
+                currentInput.append(operator);
+            } else {
+                currentInput.append(operator);
+            }
+            updateDisplay();
+        } else if (operator.equals("-")) {
+            // Allow negative numbers
+            currentInput.append(operator);
+            updateDisplay();
+        }
     }
 
     private void addDecimalPoint() {
@@ -374,39 +607,94 @@ public class CalculatorUI extends Application {
         } else if (!getLastNumber().contains(".")) {
             currentInput.append(".");
         }
-        display.setText(currentInput.toString());
+        updateDisplay();
+    }
+    
+    private String evaluateCurrentInput() {
+        try {
+            return calculator.eval(StringToExpression.parseStringTExpression(currentInput.toString())).toString();
+        } catch (Exception e) {
+            return "Error";
+        }
     }
 
     private void evaluateExpression() {
+        if (currentInput.length() == 0) return;
+        
         try {
-            // Note: This method should be extended to handle scientific notations
-            // like "9²", "√9", etc. For now, it only uses the existing parser
-            String result = c.eval(StringToExpression.parseStringTExpression(currentInput.toString())).toString();
+            // Save the expression for history
+            String expression = currentInput.toString();
+            expressionHistory.setText(expression);
+            
+            // Evaluate the expression
+            String result = calculator.eval(StringToExpression.parseStringTExpression(expression)).toString();
+            
+            // Update display with the result
             display.setText(result);
+            
+            // Save to history
+            calculationHistory.add(expression);
+            historyIndex = calculationHistory.size();
+            
+            // Reset the current input to the result for chaining calculations
             currentInput.setLength(0);
             currentInput.append(result);
         } catch (Exception e) {
-            display.setText("Error");
+            display.setText("Error: " + e.getMessage());
             currentInput.setLength(0);
         }
+    }
+    
+    private void clearDisplay() {
+        currentInput.setLength(0);
+        display.setText("");
+        expressionHistory.setText("");
     }
 
     private void handleDelete() {
         if (currentInput.length() > 0) {
             currentInput.deleteCharAt(currentInput.length() - 1);
-            display.setText(currentInput.toString());
+            updateDisplay();
+        }
+    }
+    
+    private void updateDisplay() {
+        display.setText(currentInput.toString());
+        
+        // Check for unbalanced parentheses and highlight if needed
+        int openCount = 0;
+        int closeCount = 0;
+        for (int i = 0; i < currentInput.length(); i++) {
+            if (currentInput.charAt(i) == '(') openCount++;
+            if (currentInput.charAt(i) == ')') closeCount++;
+        }
+        
+        if (openCount != closeCount) {
+            display.setStyle(display.getStyle() + "-fx-border-color: #ff6b6b;");
+        } else {
+            applyStyle(display, LIGHT_DISPLAY_STYLE, DARK_DISPLAY_STYLE);
         }
     }
 
     private boolean isLastCharacterOperator() {
         if (currentInput.length() == 0) return true;
         char lastChar = currentInput.charAt(currentInput.length() - 1);
-        return "+-*/".indexOf(lastChar) >= 0;
+        return "+-*/^%".indexOf(lastChar) >= 0;
     }
 
     private String getLastNumber() {
-        String[] parts = currentInput.toString().split("[+\\-*/]");
-        return parts.length > 0 ? parts[parts.length - 1] : "";
+        String text = currentInput.toString();
+        int lastOperatorIndex = -1;
+        
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if ("+-*/^%()".indexOf(c) >= 0) {
+                lastOperatorIndex = i;
+                break;
+            }
+        }
+        
+        return lastOperatorIndex < 0 ? text : text.substring(lastOperatorIndex + 1);
     }
 
     public static void main(String[] args) {
