@@ -1,0 +1,241 @@
+/* Modern Calculator Styling */
+
+/* Main container */
+.calculator-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    transition: background-color 0.3s;
+  }
+  
+  .calculator-container.light {
+    background: linear-gradient(to bottom right, #ffffff, #f5f5f5);
+  }
+  
+  .calculator-container.dark {
+    background: linear-gradient(to bottom right, #1e1e1e, #2d2d2d);
+  }
+  
+  .calculator-inner {
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s;
+  }
+  
+  .calculator-inner.light {
+    background-color: #ffffff;
+  }
+  
+  .calculator-inner.dark {
+    background-color: #2a2a2a;
+  }
+  
+  /* Display area */
+  .display-container {
+    margin-bottom: 15px;
+  }
+  
+  .display {
+    width: 100%;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: right;
+    border-radius: 8px;
+    outline: none;
+    border: 1px solid;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+    height: 70px;
+  }
+  
+  .display.light {
+    background-color: #ffffff;
+    color: #333333;
+    border-color: #dddddd;
+  }
+  
+  .display.dark {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border-color: #444444;
+  }
+  
+  .display.error-border {
+    border-color: #ff6b6b;
+  }
+  
+  .expression-history {
+    height: 20px;
+    font-size: 14px;
+    text-align: right;
+    padding: 0 5px;
+    margin-bottom: 5px;
+    font-style: italic;
+  }
+  
+  .expression-history.light {
+    color: #888888;
+  }
+  
+  .expression-history.dark {
+    color: #aaaaaa;
+  }
+  
+  /* Toggle buttons */
+  .toggle-container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+  }
+  
+  .toggle-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    margin: 0 5px;
+    height: 40px;
+  }
+  
+  .toggle-button.light {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .toggle-button.dark {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .toggle-button.active {
+    background-color: #0056b3;
+  }
+  
+  /* Button container and grid */
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .button-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .button-row {
+    display: flex;
+    gap: 8px;
+  }
+  
+  /* Buttons styles */
+  .calc-button {
+    flex: 1;
+    height: 65px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .calc-button:active {
+    transform: scale(0.95);
+  }
+  
+  /* Button types - Light mode */
+  .calc-button.number.light {
+    background-color: #f8f8f8;
+    color: #333333;
+  }
+  
+  .calc-button.operation.light {
+    background-color: #ff9500;
+    color: white;
+  }
+  
+  .calc-button.scientific.light {
+    background-color: #e6e6e6;
+    color: #333333;
+  }
+  
+  .calc-button.memory.light {
+    background-color: #4285f4;
+    color: white;
+  }
+  
+  /* Button types - Dark mode */
+  .calc-button.number.dark {
+    background-color: #3a3a3a;
+    color: #ffffff;
+  }
+  
+  .calc-button.operation.dark {
+    background-color: #ff9500;
+    color: white;
+  }
+  
+  .calc-button.scientific.dark {
+    background-color: #2c2c2c;
+    color: #ffffff;
+  }
+  
+  .calc-button.memory.dark {
+    background-color: #4285f4;
+    color: white;
+  }
+  
+  /* Hover effects */
+  .calc-button.light:hover {
+    filter: brightness(1.1);
+  }
+  
+  .calc-button.dark:hover {
+    filter: brightness(1.2);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .calculator-inner {
+      padding: 15px;
+    }
+    
+    .calc-button {
+      height: 55px;
+      font-size: 16px;
+    }
+    
+    .display {
+      font-size: 20px;
+      height: 60px;
+    }
+  }
+  
+  @media (max-width: 350px) {
+    .calculator-inner {
+      padding: 10px;
+    }
+    
+    .calc-button {
+      height: 50px;
+      font-size: 14px;
+    }
+    
+    .toggle-button {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+  }
