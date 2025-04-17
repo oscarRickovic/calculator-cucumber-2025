@@ -21,7 +21,11 @@ import calculator.Power;
 import calculator.Sin;
 import calculator.Cos;
 import calculator.Tan;
+import calculator.ASin;
+import calculator.ACos;
+import calculator.ATan;
 import calculator.Ln;
+import calculator.Log;
 import calculator.Exp;
 import calculator.Sqrt;
 import calculator.StaticClasses.StaticHelpers;
@@ -37,7 +41,7 @@ public class StringToExpression {
         Pattern.compile("^\\s*(-?\\d*\\.?\\d*)([-+]\\d*\\.?\\d*)?i\\s*$");
         
     // Valid function names (all lowercase)
-    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "tan", "ln", "exp", "sqrt");
+    private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "tan", "asin", "acos", "atan", "ln", "log", "exp", "sqrt");
     
     // Valid mathematical constants
     private static final Set<String> CONSTANTS = Set.of("PI", "E", "PHI", "SQRT2");
@@ -272,7 +276,11 @@ public class StringToExpression {
         Map.entry("sin", 5),
         Map.entry("cos", 5),
         Map.entry("tan", 5),  // Tangent
+        Map.entry("asin", 5),
+        Map.entry("acos", 5),
+        Map.entry("atan", 5),
         Map.entry("ln", 5),
+        Map.entry("log", 5),
         Map.entry("exp", 5),
         Map.entry("sqrt", 5)
     );
@@ -429,7 +437,11 @@ public class StringToExpression {
                     case "sin": stack.push(new Sin(null, operand)); break;
                     case "cos": stack.push(new Cos(null, operand)); break;
                     case "tan": stack.push(new Tan(null, operand)); break;
+                    case "asin": stack.push(new ASin(null, operand)); break;
+                    case "acos": stack.push(new ACos(null, operand)); break;
+                    case "atan": stack.push(new ATan(null, operand)); break;
                     case "ln": stack.push(new Ln(null, operand)); break;
+                    case "log": stack.push(new Log(null, operand)); break;
                     case "exp": stack.push(new Exp(null, operand)); break;
                     case "sqrt": stack.push(new Sqrt(null, operand)); break;
                     default: throw new IllegalArgumentException("Unsupported function: " + token);
@@ -492,7 +504,11 @@ public class StringToExpression {
             "-PI",        // Negative PI
             "sin(PI/2) + cos(PI)",  // 1 + (-1) = 0
             "sqrt(SQRT2 * SQRT2)",  // sqrt(2) = SQRT2
-            "PHI^2 - PHI - 1"  // Golden ratio property: φ² = φ + 1, so φ² - φ - 1 = 0
+            "PHI^2 - PHI - 1",  // Golden ratio property: φ² = φ + 1, so φ² - φ - 1 = 0
+            "asin(0.5)",  // asin(0.5) = π/6 ≈ 0.5236
+            "acos(0)",    // acos(0) = π/2 ≈ 1.5708
+            "atan(1)",    // atan(1) = π/4 ≈ 0.7854
+            "log(100)"    // log10(100) = 2
         };
         
         for (String expr : testExpressions) {
