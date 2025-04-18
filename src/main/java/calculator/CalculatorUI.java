@@ -53,6 +53,7 @@ public class CalculatorUI extends Application {
     private static final String LIGHT_TOGGLE_SELECTED_STYLE = "-fx-background-color: #0056b3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15;";
     private static final String LIGHT_DISPLAY_STYLE = "-fx-background-color: #ffffff; -fx-text-fill: #333333; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8;";
     private static final String LIGHT_HISTORY_STYLE = "-fx-text-fill: #888888; -fx-font-style: italic;";
+    private static final String LIGHT_PLOT_STYLE = "-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
     
     // Constants for UI design - Dark Mode
     private static final String DARK_BG = "linear-gradient(to bottom right, #1e1e1e, #2d2d2d)";
@@ -64,6 +65,7 @@ public class CalculatorUI extends Application {
     private static final String DARK_TOGGLE_SELECTED_STYLE = "-fx-background-color: #0056b3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15;";
     private static final String DARK_DISPLAY_STYLE = "-fx-background-color: #2a2a2a; -fx-text-fill: #ffffff; -fx-border-color: #444444; -fx-border-width: 1; -fx-border-radius: 8;";
     private static final String DARK_HISTORY_STYLE = "-fx-text-fill: #aaaaaa; -fx-font-style: italic;";
+    private static final String DARK_PLOT_STYLE = "-fx-background-color: #1e7e34; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
     
     // Button sizes
     private static final double BUTTON_SIZE = 65;
@@ -239,21 +241,29 @@ public class CalculatorUI extends Application {
             {"0", ".", "C", "+", LIGHT_NUMBER_STYLE, LIGHT_NUMBER_STYLE, LIGHT_OPERATION_STYLE, LIGHT_OPERATION_STYLE,
                 DARK_NUMBER_STYLE, DARK_NUMBER_STYLE, DARK_OPERATION_STYLE, DARK_OPERATION_STYLE},
             {"=", "⌫", "(", ")", LIGHT_OPERATION_STYLE, LIGHT_OPERATION_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
-                DARK_OPERATION_STYLE, DARK_OPERATION_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE}
+                DARK_OPERATION_STYLE, DARK_OPERATION_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
+            {"Plot", "", "", "", LIGHT_PLOT_STYLE, "", "", "",
+                DARK_PLOT_STYLE, "", "", ""}
         };
 
         for (int row = 0; row < buttonData.length; row++) {
             for (int col = 0; col < 4; col++) {
                 String label = buttonData[row][col];
+                
+                // Skip empty labels
+                if (label.isEmpty()) continue;
+                
                 String lightStyle = buttonData[row][col + 4];
                 String darkStyle = buttonData[row][col + 8];
                 
                 Button button = createStyledButton(label, lightStyle, darkStyle);
                 grid.add(button, col, row);
                 
-                // Make equal button larger in future iterations if needed
-                if (label.equals("=")) {
-                    // We could span multiple columns here if desired
+                // Make Plot button span multiple columns
+                if (label.equals("Plot")) {
+                    // Make the Plot button span all 4 columns
+                    GridPane.setColumnSpan(button, 4);
+                    button.setMaxWidth(Double.MAX_VALUE);
                 }
             }
         }
@@ -302,7 +312,7 @@ public class CalculatorUI extends Application {
             {"asin", "acos", "atan", "log", 
              LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
              DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
-            {"π", "e", "i", "φ", 
+            {"π", "e", "i", "x", 
              LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE, LIGHT_SCIENTIFIC_STYLE,
              DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE, DARK_SCIENTIFIC_STYLE},
             {"x²", "x³", "√x", "∛x", 
@@ -389,6 +399,21 @@ public class CalculatorUI extends Application {
                 currentInput.append(label);
                 updateDisplay();
                 break;
+            // Plotting
+            case "Plot":
+                if (currentInput.length() > 0) {
+                    try {
+                        // Open function plotter with the current expression
+                        FunctionPlotter plotter = new FunctionPlotter(currentInput.toString());
+                        plotter.showPlot();
+                    } catch (Exception ex) {
+                        display.setText("Error: Cannot plot expression");
+                        System.err.println("Error plotting: " + ex.getMessage());
+                    }
+                } else {
+                    display.setText("Enter a function with variable x");
+                }
+                break;
             // Memory operations
             case "MC":
                 memoryValue = 0.0;
@@ -444,8 +469,8 @@ public class CalculatorUI extends Application {
                 currentInput.append("i");
                 updateDisplay();
                 break;
-            case "φ":
-                currentInput.append("PHI");
+            case "x":
+                currentInput.append("x");
                 updateDisplay();
                 break;
             case "x²":
@@ -543,6 +568,14 @@ public class CalculatorUI extends Application {
         } else if (code == KeyCode.DOWN) {
             navigateHistory(1);
             event.consume();
+        } else if (code == KeyCode.X) {
+            handleButtonClick("x");
+            event.consume();
+        } else if (code == KeyCode.P) {
+            if (event.isControlDown()) {
+                handleButtonClick("Plot");
+                event.consume();
+            }
         }
     }
     
