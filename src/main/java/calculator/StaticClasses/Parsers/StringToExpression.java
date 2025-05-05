@@ -126,13 +126,10 @@ public class StringToExpression {
         }
         
         // Pre-process: insert spaces around operators and brackets for easier tokenization
-        // Fixed: using a simpler approach with string replacements instead of regex
-        String[] operators = {"+", "-", "*", "/", "^", "%", "(", ")", "[", "]", "{", "}", ","};
-        for (String op : operators) {
-            expr = expr.replace(op, " " + op + " ");
-        }
-        
-        expr = expr.replaceAll("\\s+", " ").trim();  // Normalize whitespace
+        expr = expr.replaceAll("\\s+", " ")  // Normalize whitespace
+                  .replaceAll("([\\+\\-\\*\\/\\^\\%\\(\\)\\[\\]\\{\\}\\,])", " $1 ")  // Add spaces around operators, brackets, and commas
+                  .replaceAll("\\s+", " ")  // Normalize whitespace again
+                  .trim();  // Remove leading/trailing whitespace
         
         String[] parts = expr.split(" ");
         
@@ -182,8 +179,8 @@ public class StringToExpression {
                 continue;
             }
             
-            // Check if it's a number - Fixed: using a safer pattern with limited repetition
-            if (part.matches("-?\\d{1,20}(\\.\\d{1,20})?")) {
+            // Check if it's a number - use more permissive matching for backward compatibility
+            if (part.matches("-?\\d+(\\.\\d+)?")) {
                 if (expectOperand && unaryMinusCount > 0) {
                     // Apply unary minuses
                     if (unaryMinusCount % 2 != 0) {
@@ -304,7 +301,7 @@ public class StringToExpression {
             String token = tokens.get(i);
             
             // Numbers, complex numbers, and constants go straight to output
-            if (token.matches("-?\\d{1,20}(\\.\\d{1,20})?") || isComplexNumber(token) || CONSTANTS.contains(token)) {
+            if (token.matches("-?\\d+(\\.\\d+)?") || isComplexNumber(token) || CONSTANTS.contains(token)) {
                 output.add(token);
             } 
             // Handle function names
@@ -386,11 +383,10 @@ public class StringToExpression {
         }
         
         // Check for patterns like 3+4i, 2i, etc.
-        // Fixed: using safer patterns with limited repetition
-        return token.matches(".*\\d{1,20}i$") || 
-               token.matches(".*\\d{1,20}\\.\\d{1,20}i$") ||
-               token.matches(".*[-+]\\d{1,20}i$") || 
-               token.matches(".*[-+]\\d{1,20}\\.\\d{1,20}i$") ||
+        return token.matches(".*\\d+i$") || 
+               token.matches(".*\\d+\\.\\d+i$") ||
+               token.matches(".*[-+]\\d+i$") || 
+               token.matches(".*[-+]\\d+\\.\\d+i$") ||
                COMPLEX_PATTERN.matcher(token).matches();
     }
     
@@ -418,8 +414,8 @@ public class StringToExpression {
             else if (CONSTANTS.contains(token)) {
                 stack.push(new MathConstant(token));
             }
-            // Handle regular numbers
-            else if (token.matches("-?\\d{1,20}(\\.\\d{1,20})?")) {
+            // Handle regular numbers - use more permissive pattern matching for backward compatibility
+            else if (token.matches("-?\\d+(\\.\\d+)?")) {
                 // Parse as a double if it contains a decimal point, otherwise as an integer
                 if (token.contains(".")) {
                     stack.push(new MyNumber(Double.parseDouble(token)));
