@@ -1,5 +1,7 @@
 package calculator;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -7,14 +9,25 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import calculator.StaticClasses.Parsers.StringToExpression;
+import calculator.Calculator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A utility class to plot mathematical functions using JavaFX charts.
+ * Optimized to prevent UI freezing and excessive resource consumption.
  */
 public class FunctionPlotter {
     
@@ -24,13 +37,23 @@ public class FunctionPlotter {
     private NumberAxis yAxis;
     private FunctionEvaluator functionEvaluator;
     private String functionStr;
+    private ProgressIndicator progressIndicator;
+    private Label statusLabel;
+    private ExecutorService executor;
+    private AtomicBoolean isPlotting = new AtomicBoolean(false);
     
-    // Plot range
+    // Plot range - with reasonable defaults
     private double minX = -10;
     private double maxX = 10;
     private double minY = -10; 
     private double maxY = 10;
     private double step = 0.1;
+    
+    // Maximum number of points to plot
+    private static final int MAX_POINTS = 10000;
+    
+    // Maximum time for a single point evaluation (ms)
+    private static final long MAX_EVAL_TIME = 50;
     
     /**
      * Creates a new function plotter for the given function expression.
@@ -40,6 +63,7 @@ public class FunctionPlotter {
     public FunctionPlotter(String functionStr) {
         this.functionStr = functionStr;
         this.functionEvaluator = new FunctionEvaluator(functionStr);
+        this.executor = Executors.newSingleThreadExecutor();
         setupPlotter();
     }
     
@@ -56,43 +80,118 @@ public class FunctionPlotter {
         lineChart.setTitle("Plot of " + functionStr);
         lineChart.setCreateSymbols(false); // No markers on the line
         lineChart.setLegendVisible(true);
+        
+        // Create progress indicator
+        progressIndicator = new ProgressIndicator();
+        progressIndicator.setVisible(false);
+        
+        // Create status label
+        statusLabel = new Label("Ready to plot");
     }
     
     /**
-     * Plot the function
+     * Plot the function in a background thread
      */
     public void plot() {
-        // Create a data series for the function
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName(functionStr);
-        
-        // Calculate points for the function
-        for (double x = minX; x <= maxX; x += step) {
-            try {
-                double y = evaluateFunction(x);
-                // Only add the point if it's within our y range
-                if (y >= minY && y <= maxY && !Double.isNaN(y) && !Double.isInfinite(y)) {
-                    series.getData().add(new XYChart.Data<>(x, y));
-                }
-            } catch (Exception e) {
-                // Skip points where function can't be evaluated
-                //System.out.println("Skipping point at x=" + x + ": " + e.getMessage());
-            }
+        // Don't start plotting if another plot operation is in progress
+        if (isPlotting.get()) {
+            statusLabel.setText("Plotting already in progress...");
+            return;
         }
         
-        // Add the series to the chart
-        lineChart.getData().clear();
-        lineChart.getData().add(series);
+        // Update UI to show we're starting to plot
+        isPlotting.set(true);
+        progressIndicator.setVisible(true);
+        progressIndicator.setProgress(-1); // Indeterminate progress
+        statusLabel.setText("Calculating plot points...");
         
-        // Show the chart in a new window
-        showPlot();
+        // Calculate how many points to plot
+        int numPoints = (int)Math.min(MAX_POINTS, (maxX - minX) / step + 1);
+        double adjustedStep = (maxX - minX) / (numPoints - 1);
+        
+        Task<XYChart.Series<Number, Number>> task = new Task<>() {
+            @Override
+            protected XYChart.Series<Number, Number> call() throws Exception {
+                XYChart.Series<Number, Number> series = new XYChart.Series<>();
+                series.setName(functionStr);
+                
+                List<XYChart.Data<Number, Number>> points = new ArrayList<>();
+                int completedPoints = 0;
+                
+                // Calculate points for the function
+                for (double x = minX; x <= maxX && !isCancelled(); x += adjustedStep) {
+                    try {
+                        // Timeout mechanism for each function evaluation
+                        long startTime = System.currentTimeMillis();
+                        double y = evaluateFunction(x);
+                        long endTime = System.currentTimeMillis();
+                        
+                        // Skip point if evaluation took too long
+                        if (endTime - startTime > MAX_EVAL_TIME) {
+                            continue;
+                        }
+                        
+                        // Only add the point if it's within our y range
+                        if (y >= minY && y <= maxY && !Double.isNaN(y) && !Double.isInfinite(y)) {
+                            points.add(new XYChart.Data<>(x, y));
+                        }
+                        
+                        // Update progress
+                        completedPoints++;
+                        updateProgress(completedPoints, numPoints);
+                    } catch (Exception e) {
+                        // Skip points where function can't be evaluated
+                    }
+                }
+                
+                return series;
+            }
+        };
+        
+        task.setOnSucceeded(event -> {
+            XYChart.Series<Number, Number> series = task.getValue();
+            
+            // Update UI on JavaFX thread
+            Platform.runLater(() -> {
+                lineChart.getData().clear();
+                lineChart.getData().add(series);
+                progressIndicator.setVisible(false);
+                statusLabel.setText("Plot complete");
+                isPlotting.set(false);
+            });
+        });
+        
+        task.setOnFailed(event -> {
+            // Update UI on JavaFX thread to show error
+            Platform.runLater(() -> {
+                progressIndicator.setVisible(false);
+                statusLabel.setText("Error plotting function: " + task.getException().getMessage());
+                isPlotting.set(false);
+            });
+        });
+        
+        task.setOnCancelled(event -> {
+            // Update UI on JavaFX thread to show cancellation
+            Platform.runLater(() -> {
+                progressIndicator.setVisible(false);
+                statusLabel.setText("Plotting cancelled");
+                isPlotting.set(false);
+            });
+        });
+        
+        // Bind progress indicator to task progress
+        progressIndicator.progressProperty().bind(task.progressProperty());
+        
+        // Execute the task
+        executor.submit(task);
     }
     
     /**
-     * Evaluate the function at a given x value
+     * Evaluate the function at a given x value with a timeout mechanism
      * 
      * @param x The x value
      * @return The y value
+     * @throws Exception If evaluation fails or times out
      */
     private double evaluateFunction(double x) throws Exception {
         return functionEvaluator.evaluate(x);
@@ -109,13 +208,24 @@ public class FunctionPlotter {
             // Create controls for adjusting the plot range
             VBox controls = createControls();
             
+            // Create a container for the progress indicator and status label
+            HBox statusBar = new HBox(10, progressIndicator, statusLabel);
+            statusBar.setPadding(new Insets(5));
+            
             BorderPane root = new BorderPane();
             root.setCenter(lineChart);
-            root.setBottom(controls);
+            root.setBottom(new VBox(statusBar, controls));
             root.setPadding(new Insets(10));
             
             Scene scene = new Scene(root, 800, 600);
             stage.setScene(scene);
+            
+            // Clean up resources when window is closed
+            stage.setOnCloseRequest(e -> {
+                if (executor != null) {
+                    executor.shutdownNow();
+                }
+            });
         }
         
         // Show the stage
@@ -160,6 +270,12 @@ public class FunctionPlotter {
                 maxY = Double.parseDouble(maxYField.getText());
                 step = Double.parseDouble(stepField.getText());
                 
+                // Validate inputs
+                if (minX >= maxX || minY >= maxY || step <= 0) {
+                    statusLabel.setText("Invalid range values");
+                    return;
+                }
+                
                 // Update the axes
                 xAxis.setLowerBound(minX);
                 xAxis.setUpperBound(maxX);
@@ -169,7 +285,7 @@ public class FunctionPlotter {
                 // Re-plot
                 plot();
             } catch (NumberFormatException ex) {
-                System.err.println("Invalid number format: " + ex.getMessage());
+                statusLabel.setText("Invalid number format: " + ex.getMessage());
             }
         });
         
@@ -185,11 +301,14 @@ public class FunctionPlotter {
     }
     
     /**
-     * Close the plot window
+     * Close the plot window and clean up resources
      */
     public void close() {
         if (stage != null) {
             stage.close();
+        }
+        if (executor != null) {
+            executor.shutdownNow();
         }
     }
 }
