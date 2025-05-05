@@ -38,6 +38,7 @@ public class CalculatorUI extends Application {
     private ToggleButton themeToggle;
     private List<String> calculationHistory = new ArrayList<>();
     private int historyIndex = -1;
+    private LinearEquationSolverUI equationSolverUI;
     
     // Memory functionality
     private double memoryValue = 0.0;
@@ -54,6 +55,7 @@ public class CalculatorUI extends Application {
     private static final String LIGHT_DISPLAY_STYLE = "-fx-background-color: #ffffff; -fx-text-fill: #333333; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 8;";
     private static final String LIGHT_HISTORY_STYLE = "-fx-text-fill: #888888; -fx-font-style: italic;";
     private static final String LIGHT_PLOT_STYLE = "-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String LIGHT_MENU_STYLE = "-fx-background-color: #f8f8f8; -fx-text-fill: #333333;";
     
     // Constants for UI design - Dark Mode
     private static final String DARK_BG = "linear-gradient(to bottom right, #1e1e1e, #2d2d2d)";
@@ -66,6 +68,7 @@ public class CalculatorUI extends Application {
     private static final String DARK_DISPLAY_STYLE = "-fx-background-color: #2a2a2a; -fx-text-fill: #ffffff; -fx-border-color: #444444; -fx-border-width: 1; -fx-border-radius: 8;";
     private static final String DARK_HISTORY_STYLE = "-fx-text-fill: #aaaaaa; -fx-font-style: italic;";
     private static final String DARK_PLOT_STYLE = "-fx-background-color: #1e7e34; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+    private static final String DARK_MENU_STYLE = "-fx-background-color: #2c2c2c; -fx-text-fill: #ffffff;";
     
     // Button sizes
     private static final double BUTTON_SIZE = 65;
@@ -75,6 +78,9 @@ public class CalculatorUI extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Modern Calculator");
+
+        // Initialize the equation solver UI
+        this.equationSolverUI = new LinearEquationSolverUI();
 
         // Create display with improved styling
         display = new TextField();
@@ -93,6 +99,10 @@ public class CalculatorUI extends Application {
         
         // Set initial display width
         display.setPrefWidth(4 * BUTTON_SIZE + 5 * BUTTON_SPACING);
+
+        // Create menu bar
+        MenuBar menuBar = createMenuBar();
+        applyStyle(menuBar, LIGHT_MENU_STYLE, DARK_MENU_STYLE);
 
         // Create toggle buttons container
         HBox toggleContainer = new HBox(10);
@@ -133,10 +143,10 @@ public class CalculatorUI extends Application {
         // Create scientific button grid
         scientificGrid = createScientificButtonGrid();
         
-        // Create the top panel with display and toggle buttons
+        // Create the top panel with menu bar, display and toggle buttons
         VBox topPanel = new VBox(10);
         topPanel.setPadding(new Insets(15));
-        topPanel.getChildren().addAll(displayContainer, toggleContainer);
+        topPanel.getChildren().addAll(menuBar, displayContainer, toggleContainer);
         
         // Create the button container
         VBox buttonContainer = new VBox(10);
@@ -161,6 +171,62 @@ public class CalculatorUI extends Application {
         
         // Set focus to the scene, not the text field
         scene.getRoot().requestFocus();
+    }
+    
+    private MenuBar createMenuBar() {
+        MenuBar menuBar = new MenuBar();
+        
+        // File menu
+        Menu fileMenu = new Menu("File");
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.setOnAction(e -> primaryStage.close());
+        fileMenu.getItems().add(exitItem);
+        
+        // Tools menu
+        Menu toolsMenu = new Menu("Tools");
+        
+        MenuItem equationSolverItem = new MenuItem("Equation Solver");
+        equationSolverItem.setOnAction(e -> equationSolverUI.showSolver());
+        
+        MenuItem plotterItem = new MenuItem("Function Plotter");
+        plotterItem.setOnAction(e -> {
+            if (currentInput.length() > 0) {
+                try {
+                    FunctionPlotter plotter = new FunctionPlotter(currentInput.toString());
+                    plotter.showPlot();
+                } catch (Exception ex) {
+                    display.setText("Error: Cannot plot expression");
+                    System.err.println("Error plotting: " + ex.getMessage());
+                }
+            } else {
+                display.setText("Enter a function with variable x");
+            }
+        });
+        
+        toolsMenu.getItems().addAll(equationSolverItem, plotterItem);
+        
+        // Help menu
+        Menu helpMenu = new Menu("Help");
+        MenuItem aboutItem = new MenuItem("About");
+        aboutItem.setOnAction(e -> showAboutDialog());
+        helpMenu.getItems().add(aboutItem);
+        
+        menuBar.getMenus().addAll(fileMenu, toolsMenu, helpMenu);
+        return menuBar;
+    }
+    
+    private void showAboutDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About Calculator");
+        alert.setHeaderText("Advanced Calculator with Scientific Functions");
+        alert.setContentText("Version 1.0\n" +
+                            "Features include:\n" +
+                            "- Basic arithmetic operations\n" +
+                            "- Scientific calculations\n" +
+                            "- Function plotting\n" +
+                            "- Linear equation solving\n" +
+                            "- Complex number support");
+        alert.showAndWait();
     }
     
     private void applyStyle(Control control, String lightStyle, String darkStyle) {
