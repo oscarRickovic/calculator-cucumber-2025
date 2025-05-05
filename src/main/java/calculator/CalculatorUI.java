@@ -73,11 +73,19 @@ public class CalculatorUI extends Application {
     // Button sizes
     private static final double BUTTON_SIZE = 65;
     private static final double BUTTON_SPACING = 8;
+    private MatrixOperationsUI matrixOperationsUI;
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Modern Calculator");
+
+        // Initialize the equation solver UI
+        this.equationSolverUI = new LinearEquationSolverUI();
+        
+        // Initialize the matrix operations UI
+        this.matrixOperationsUI = new MatrixOperationsUI();
+
 
         // Initialize the equation solver UI
         this.equationSolverUI = new LinearEquationSolverUI();
@@ -188,6 +196,9 @@ public class CalculatorUI extends Application {
         MenuItem equationSolverItem = new MenuItem("Equation Solver");
         equationSolverItem.setOnAction(e -> equationSolverUI.showSolver());
         
+        MenuItem matrixOperationsItem = new MenuItem("Matrix Operations");
+        matrixOperationsItem.setOnAction(e -> matrixOperationsUI.showMatrixOperations());
+        
         MenuItem plotterItem = new MenuItem("Function Plotter");
         plotterItem.setOnAction(e -> {
             if (currentInput.length() > 0) {
@@ -203,7 +214,7 @@ public class CalculatorUI extends Application {
             }
         });
         
-        toolsMenu.getItems().addAll(equationSolverItem, plotterItem);
+        toolsMenu.getItems().addAll(equationSolverItem, matrixOperationsItem, plotterItem);
         
         // Help menu
         Menu helpMenu = new Menu("Help");
@@ -225,6 +236,7 @@ public class CalculatorUI extends Application {
                             "- Scientific calculations\n" +
                             "- Function plotting\n" +
                             "- Linear equation solving\n" +
+                            "- Matrix operations\n" +
                             "- Complex number support");
         alert.showAndWait();
     }
