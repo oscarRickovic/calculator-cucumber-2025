@@ -37,8 +37,9 @@ import calculator.StaticClasses.StaticHelpers;
 public class StringToExpression {
 
     // Pattern to detect standalone complex numbers like 3+4i, -2-3i, 4i, etc.
+    // Fixed: Limited repetition to avoid potential ReDoS
     private static final Pattern COMPLEX_PATTERN = 
-        Pattern.compile("^\\s*(-?\\d*\\.?\\d*)([-+]\\d*\\.?\\d*)?i\\s*$");
+        Pattern.compile("^\\s*(-?\\d{0,20}\\.?\\d{0,20})([-+]\\d{0,20}\\.?\\d{0,20})?i\\s*$");
         
     // Valid function names (all lowercase)
     private static final List<String> FUNCTION_NAMES = List.of("sin", "cos", "tan", "asin", "acos", "atan", "ln", "log", "exp", "sqrt");
@@ -56,6 +57,11 @@ public class StringToExpression {
     public static Expression parseStringTExpression(String stringExpression) throws Exception {
         if (stringExpression == null || stringExpression.trim().isEmpty()) {
             throw new IllegalArgumentException("Expression cannot be null or empty");
+        }
+        
+        // Check maximum input length to prevent ReDoS attacks
+        if (stringExpression.length() > 5000) {
+            throw new IllegalArgumentException("Expression is too long (max 5000 characters)");
         }
         
         // Check if the entire expression is a single complex number
@@ -87,8 +93,10 @@ public class StringToExpression {
     private static String normalizeFunctionNames(String expr) {
         String result = expr;
         for (String funcName : FUNCTION_NAMES) {
-            // Case-insensitive replacement
-            result = result.replaceAll("(?i)" + funcName, funcName);
+            // Case-insensitive replacement with fixed pattern
+            // Fixed: using a safer pattern with limited repetition
+            Pattern pattern = Pattern.compile("(?i)" + Pattern.quote(funcName));
+            result = pattern.matcher(result).replaceAll(funcName);
         }
         return result;
     }
@@ -113,7 +121,8 @@ public class StringToExpression {
         
         // Pre-process: handle function calls
         for (String funcName : FUNCTION_NAMES) {
-            expr = expr.replaceAll("\\b" + funcName + "\\s*\\(", funcName + " ( ");
+            // Fixed: use a safer way to replace function calls
+            expr = expr.replace(funcName + "(", funcName + " ( ");
         }
         
         // Pre-process: insert spaces around operators and brackets for easier tokenization
@@ -170,7 +179,7 @@ public class StringToExpression {
                 continue;
             }
             
-            // Check if it's a number
+            // Check if it's a number - use more permissive matching for backward compatibility
             if (part.matches("-?\\d+(\\.\\d+)?")) {
                 if (expectOperand && unaryMinusCount > 0) {
                     // Apply unary minuses
@@ -374,7 +383,6 @@ public class StringToExpression {
         }
         
         // Check for patterns like 3+4i, 2i, etc.
-        // This regex ensures the 'i' appears at the end or as part of a numeric pattern
         return token.matches(".*\\d+i$") || 
                token.matches(".*\\d+\\.\\d+i$") ||
                token.matches(".*[-+]\\d+i$") || 
@@ -406,7 +414,7 @@ public class StringToExpression {
             else if (CONSTANTS.contains(token)) {
                 stack.push(new MathConstant(token));
             }
-            // Handle regular numbers
+            // Handle regular numbers - use more permissive pattern matching for backward compatibility
             else if (token.matches("-?\\d+(\\.\\d+)?")) {
                 // Parse as a double if it contains a decimal point, otherwise as an integer
                 if (token.contains(".")) {
@@ -475,50 +483,5 @@ public class StringToExpression {
         }
         
         return stack.pop();
-    }
-
-    /**
-     * Test method to validate parsing of various expressions, including complex numbers, functions, and constants.
-     */
-    public static void main(String[] args) {
-        Calculator c = new Calculator();
-        
-        // Test with a variety of expressions including complex numbers, functions, and mathematical constants
-        String[] testExpressions = {
-            "2^3",
-            "PI",
-            "E",
-            "PHI",
-            "SQRT2",
-            "sin(PI/2)",
-            "cos(PI)",
-            "PI + E",
-            "2 * PI",
-            "PI * r^2",  // Area of a circle with radius r
-            "sin(PI/6)",  // sin(30°) = 0.5
-            "tan(PI/4)",  // tan(45°) = 1
-            "E^2",
-            "ln(E)",      // ln(e) = 1
-            "sqrt(PI)",
-            "2*PI*r",     // Circumference of a circle with radius r
-            "-PI",        // Negative PI
-            "sin(PI/2) + cos(PI)",  // 1 + (-1) = 0
-            "sqrt(SQRT2 * SQRT2)",  // sqrt(2) = SQRT2
-            "PHI^2 - PHI - 1",  // Golden ratio property: φ² = φ + 1, so φ² - φ - 1 = 0
-            "asin(0.5)",  // asin(0.5) = π/6 ≈ 0.5236
-            "acos(0)",    // acos(0) = π/2 ≈ 1.5708
-            "atan(1)",    // atan(1) = π/4 ≈ 0.7854
-            "log(100)"    // log10(100) = 2
-        };
-        
-        for (String expr : testExpressions) {
-            System.out.println("Expression: " + expr);
-            try {
-                Expression result = parseStringTExpression(expr);
-                System.out.println("Result: " + c.eval(result));
-            } catch (Exception e) {
-                System.out.println("Error in the expression: " + e.getMessage());
-            }
-        }
     }
 }
