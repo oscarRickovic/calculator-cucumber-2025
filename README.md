@@ -1,3 +1,10 @@
+[![CI](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/ci.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/codeql.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/dependency-review.yml)
+[![Maven Build](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/maven.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/maven.yml)
+[![PMD Analysis](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/pmd.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/pmd.yml)
+[![Release](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/release.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/release.yml)
+[![Scorecard](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/scorecard.yml/badge.svg)](https://github.com/oscarRickovic/calculator-cucumber-2025/actions/workflows/scorecard.yml)
 # Contributing to Calculator Cucumber Project
 
 ## 🎉 Welcome Contributors!
