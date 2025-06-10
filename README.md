@@ -47,8 +47,14 @@ mvn clean install
 # Run tests
 mvn test
 
-# Run the application
+# Run the application FX
 mvn javafx:run
+
+# Run the Spring boot application
+mvn spring-boot:run
+
+# Run the command Line Console.
+mvn exec:java
 ```
 
 ## 🤝 Contribution Workflow
